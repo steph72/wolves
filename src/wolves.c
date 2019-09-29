@@ -9,7 +9,7 @@
 #include "wolftypes.h"
 #include "io.h"
 
-const char *names[] = {"buba", "liza", "schnitzel", "darko", "coco", "ben", "tati", "lia", "tia", "laika"};
+const char *names[] = {"buba", "candor", "liza", "schnitzel", "darko", "coco", "ben", "tati", "lia", "tia", "laika"};
 char buf[40];
 
 thing *preyHead;

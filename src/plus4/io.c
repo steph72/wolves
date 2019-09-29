@@ -62,8 +62,14 @@ void setupScreen()
 	memset((screen + 40), it_earth + 65, 999 - 80);
 	memset((COLOR_RAM + 40), EARTHCOLOR, 999 - 80);
 
-	memset((screen+960),160,39);
-	memset((COLOR_RAM+960),FRAMECOLOR,39);
+	memset((screen + 960), 160, 39);
+	memset((COLOR_RAM + 960), FRAMECOLOR, 39);
+
+	textcolor(FRAMECOLOR);
+	revers(1);
+	gotoxy(31, 24);
+	cputs("pe:");
+	revers(0);
 
 	for (i = 1; i < 39; i++)
 	{
@@ -87,7 +93,6 @@ void setupScreen()
 	*(COLOR_RAM + 39) = FRAMECOLOR;
 	*(COLOR_RAM + 920) = FRAMECOLOR;
 	*(COLOR_RAM + 920 + 39) = FRAMECOLOR;
-
 }
 
 void installChars()
@@ -132,21 +137,36 @@ void restoreLowerFrame()
 	}
 }
 
-void displayPackEnergy(int packEnergy) {
-	gotoxy(35,24);
+void displayPackEnergy(int packEnergy)
+{
+	gotoxy(35, 24);
 	textcolor(FRAMECOLOR);
 	revers(1);
-	printf("%4d",packEnergy);
+	printf("%4d", packEnergy);
 	revers(0);
+}
+
+void waitTedTicks(char t)
+{
+	char i;
+	for (i = 0; i < t; ++i)
+	{
+		TED.t1_lo = 0;
+		TED.t1_hi = 60;
+		while (TED.t1_hi != 0)
+			;
+	}
 }
 
 char updateStatus(char *currentWolfName, char *statusLine)
 {
 	char shouldUpdateAgain;
+	char i;
+	char rvs = 1;
 	shouldUpdateAgain = false;
 
-	memset((screen+960),160,30);
-	memset((COLOR_RAM+960),FRAMECOLOR,30);
+	memset((screen + 960), 160, 30);
+	memset((COLOR_RAM + 960), FRAMECOLOR, 30);
 
 	*(screen + 960) = 245;
 	*(screen + 960 + 39) = 246;
@@ -160,10 +180,15 @@ char updateStatus(char *currentWolfName, char *statusLine)
 	if (statusLine != NULL)
 	{
 		restoreLowerFrame();
-		gotoxy(2, 0);
 		textcolor(FRAMECOLOR);
-		revers(1);
-		cprintf(statusLine);
+		for (i = 0; i < 5; ++i)
+		{
+			rvs = !rvs;
+			gotoxy(2, 0);
+			revers(rvs);
+			cprintf(statusLine);
+			waitTedTicks(5);
+		}
 		statusLine = NULL;
 		shouldUpdateAgain = true;
 		revers(0);

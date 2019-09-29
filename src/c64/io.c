@@ -3,13 +3,14 @@
 #include <string.h>
 #include <6502.h>
 #include <stdio.h>
+#include <c64.h>
 
 #define vicctl (unsigned char *)53265u
 #define vicadr (unsigned char *)53272u
-#define vicbank (unsigned char*)56576u
+#define vicbank (unsigned char *)56576u
 #define screen (unsigned char *)0x8000u
 #define procio (unsigned char *)1u
-#define kernalScreenPtr (unsigned char*)648u
+#define kernalScreenPtr (unsigned char *)648u
 
 #define FRAMECOLOR 14
 
@@ -65,12 +66,12 @@ void installCharset()
 	char i;
 
 	SEI();
-	*procio = (*procio & 251);	// enable RAM ,disable IO
-	memcpy((char*)RAMCHARS,(char*)0xd000,0x1000);
-	*procio = (*procio | 4);	// re-enable IO
+	*procio = (*procio & 251); // enable RAM ,disable IO
+	memcpy((char *)RAMCHARS, (char *)0xd000, 0x1000);
+	*procio = (*procio | 4); // re-enable IO
 
-	*vicbank = ((*vicbank)&252)|1;	// select $8000-$bfff as vic bank
-	*vicadr = 8; // $D018 = %xxxx100x -> charmem is at base + $2000
+	*vicbank = ((*vicbank) & 252) | 1; // select $8000-$bfff as vic bank
+	*vicadr = 8;					   // $D018 = %xxxx100x -> charmem is at base + $2000
 
 	*kernalScreenPtr = 128;
 	// *vicadr = *vicadr & 240 | 12;
@@ -78,28 +79,35 @@ void installCharset()
 
 	for (i = 0; i < 8; i++)
 	{
-		*((unsigned char *)(RAMCHARS + (65 * 8) + i)) = preyC[i];				   // 66 = "P"
-		*((unsigned char *)(RAMCHARS + (66 * 8) + i)) = wolfC[i];				   // 87 = "W"
+		*((unsigned char *)(RAMCHARS + (65 * 8) + i)) = preyC[i];				  // 66 = "P"
+		*((unsigned char *)(RAMCHARS + (66 * 8) + i)) = wolfC[i];				  // 87 = "W"
 		*((unsigned char *)(RAMCHARS + ((66 + 128) * 8) + i)) = 255 - (wolfC[i]); // 215 = inverse "W"
-		*((unsigned char *)(RAMCHARS + (67 * 8) + i)) = florC[i];				   // 69 = "E"
-		*((unsigned char *)(RAMCHARS + (68 * 8) + i)) = bushC[i];				   // 66 = "B"
-		*((unsigned char *)(RAMCHARS + (69 * 8) + i)) = treeC[i];				   // 84 = "T"
+		*((unsigned char *)(RAMCHARS + (67 * 8) + i)) = florC[i];				  // 69 = "E"
+		*((unsigned char *)(RAMCHARS + (68 * 8) + i)) = bushC[i];				  // 66 = "B"
+		*((unsigned char *)(RAMCHARS + (69 * 8) + i)) = treeC[i];				  // 84 = "T"
 	}
 }
 
-void dbgNumPrey(char num) {
-	*(screen)='0'+num;
+void dbgNumPrey(char num)
+{
+	*(screen) = '0' + num;
 }
 
 void setupScreen()
 {
 	char i;
 
-	memset((screen+40),it_earth+65,999-80);
-	memset((COLOR_RAM+40),EARTHCOLOR,999-80);
+	memset((screen + 40), it_earth + 65, 999 - 80);
+	memset((COLOR_RAM + 40), EARTHCOLOR, 999 - 80);
 
-	memset((screen+960),160,39);
-	memset((COLOR_RAM+960),FRAMECOLOR,39);
+	memset((screen + 960), 160, 39);
+	memset((COLOR_RAM + 960), FRAMECOLOR, 39);
+
+	revers(1);
+	textcolor(FRAMECOLOR);
+	gotoxy(31, 24);
+	cputs("pe:");
+	revers(0);
 
 	for (i = 1; i < 39; i++)
 	{
@@ -149,22 +157,34 @@ void restoreLowerFrame()
 	}
 }
 
-void displayPackEnergy(int packEnergy) {
-	gotoxy(35,24);
+void displayPackEnergy(int packEnergy)
+{
+	gotoxy(35, 24);
 	textcolor(FRAMECOLOR);
 	revers(1);
-	printf("%4d",packEnergy);
+	printf("%4d", packEnergy);
 	revers(0);
+}
+
+void waitCIATicks(char ticks)
+{
+	char i;
+	for (i = 0; i < ticks; ++i)
+	{
+		while (CIA1.ta_lo != 0)
+			;
+	}
 }
 
 char updateStatus(char *currentWolfName, char *statusLine)
 {
 	unsigned char i;
+	char rvs;
 	char shouldUpdateAgain;
 	shouldUpdateAgain = false;
 
-	memset((screen+960),160,30);
-	memset((COLOR_RAM+960),FRAMECOLOR,30);
+	memset((screen + 960), 160, 30);
+	memset((COLOR_RAM + 960), FRAMECOLOR, 30);
 
 	*(screen + 960) = 245;
 	*(screen + 960 + 39) = 246;
@@ -178,13 +198,17 @@ char updateStatus(char *currentWolfName, char *statusLine)
 	if (statusLine != NULL)
 	{
 		restoreLowerFrame();
-		gotoxy(2, 0);
 		textcolor(FRAMECOLOR);
-		revers(1);
-		cprintf(statusLine);
+		for (i = 0; i < 5; ++i)
+		{
+			rvs = !rvs;
+			gotoxy(2, 0);
+			revers(rvs);
+			cprintf(statusLine);
+			waitCIATicks(10);
+		}
 		statusLine = NULL;
 		shouldUpdateAgain = true;
-		textcolor(4);
 		revers(0);
 	}
 	else
