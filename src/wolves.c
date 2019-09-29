@@ -1,13 +1,15 @@
 /* main */
 
 #include <stdio.h>
-#include <conio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <conio.h>
 #include <6502.h>
 
 #include "wolftypes.h"
 #include "io.h"
+#include "utils.h"
+#include "levels.h"
 
 const char *names[] = {"buba", "candor", "liza", "schnitzel", "darko", "coco", "ben", "tati", "lia", "tia", "laika"};
 char buf[40];
@@ -17,7 +19,7 @@ thing wolves[MAXWOLVES];
 
 int packEnergy;
 
-char numWolves;
+char wolfCount;
 char numPrey;
 char currentWolfIndex;
 char shouldUpdateStatus;
@@ -26,15 +28,13 @@ char *statusLine;
 char itemAtPos(char x, char y);
 void addScenery(char sc);
 
-/* ---------- BEGIN PROGRAM ---------- */
-
 void getFreePosition(position *aPos)
 {
 	char x, y;
 	do
 	{
-		x = minX + rand() % (maxX - minX - 1);
-		y = minY + rand() % (maxY - minY - 1);
+		x = minX + drand(maxX - minX - 1);
+		y = minY + drand(maxY - minY - 1);
 	} while (itemAtPos(x, y) != it_earth);
 	aPos->x = x;
 	aPos->y = y;
@@ -74,12 +74,12 @@ void addWolf()
 {
 	thing *newWolf;
 	position newPos;
-	if (numWolves >= 10)
+	if (wolfCount >= 10)
 	{
 		return;
 	}
-	newWolf = &(wolves[numWolves]);
-	numWolves++;
+	newWolf = &(wolves[wolfCount]);
+	wolfCount++;
 	getFreePosition(&newPos);
 	newWolf->pos = newPos;
 }
@@ -95,7 +95,6 @@ void addPrey()
 	prey->type = it_prey; //  'a'+numPrey;
 	displayThing(prey, false);
 	numPrey++;
-	dbgNumPrey(numPrey);
 }
 
 void removePrey(thing *aPrey)
@@ -114,14 +113,14 @@ void removePrey(thing *aPrey)
 	}
 	free(aPrey);
 	numPrey--;
-	dbgNumPrey(numPrey);
 }
 
 void init()
 {
 	unsigned int i;
 	clrscr();
-	numWolves = 0;
+	wolfCount = 0;
+	packEnergy = 500;
 	numPrey = 0;
 	preyHead = NULL;
 	for (i = 0; i < MAXWOLVES; i++)
@@ -133,7 +132,6 @@ void init()
 	}
 	statusLine = "welcome! help the wolves survive";
 	initMachineIO();
-	setupScreen();
 }
 
 char positionIsOffScreen(position *aPos)
@@ -153,8 +151,8 @@ void wanderPrey(thing *aPrey)
 	oldPos = aPrey->pos;
 	do
 	{
-		xdiff = -1 + rand() % 3;
-		ydiff = -1 + rand() % 3;
+		xdiff = -1 + drand(3);
+		ydiff = -1 + drand(3);
 		newPos.x = oldPos.x + xdiff;
 		newPos.y = oldPos.y + ydiff;
 	} while (!isValidDestination(&newPos));
@@ -208,7 +206,7 @@ void lookoutPrey(thing *aPrey)
 	thing *testWolf;
 	signed char xdiff, ydiff;
 	char i;
-	for (i = 0; i < numWolves; i++)
+	for (i = 0; i < wolfCount; i++)
 	{
 		testWolf = &(wolves[i]);
 		xdiff = (testWolf->pos.x - aPrey->pos.x);
@@ -241,7 +239,7 @@ void servicePrey(char preyChance)
 		}
 		currentPrey = currentPrey->next;
 	}
-	if ((rand() % 100) < preyChance)
+	if (drand(100) < preyChance)
 	{
 		addPrey();
 	}
@@ -268,17 +266,19 @@ void catchPrey(char wolfIdx, char x, char y)
 void updateWolves()
 {
 	char i;
-	for (i = 0; i < numWolves; i++)
+	for (i = 0; i < wolfCount; i++)
 	{
 		displayThing(&wolves[i], i == currentWolfIndex);
 	}
 }
 
-void moveWolf(char wolfIdx, char xDelta, char yDelta)
+char moveWolf(char wolfIdx, char xDelta, char yDelta)
 {
 	thing *activeWolf;
 	position newPos;
 	itemType item;
+
+	char caught = 0;
 
 	activeWolf = &wolves[wolfIdx];
 	newPos.x = activeWolf->pos.x + xDelta;
@@ -287,15 +287,18 @@ void moveWolf(char wolfIdx, char xDelta, char yDelta)
 
 	if (item == it_prey)
 	{
+		caught = 1;
 		catchPrey(wolfIdx, newPos.x, newPos.y);
 	}
 	else if (item != it_earth)
 	{
-		return;
+		return 0;
 	}
 
 	putItemAtPos(activeWolf->pos.x, activeWolf->pos.y, it_earth);
 	activeWolf->pos = newPos;
+
+	return caught;
 }
 
 void displayStatusIfNeeded()
@@ -309,23 +312,32 @@ void displayStatusIfNeeded()
 	statusLine = NULL;
 }
 
-void gameLoop(char preyChance)
+void gameLoop(char preyChance, char preyNeeded)
 {
 
 	char quit;
 	char command;
 	char xd, yd;
 
+	char huntSuccess;
+	char preyCaught = 0;
+
 	quit = false;
 	currentWolfIndex = 0;
 	updateWolves();
+	displayStatusIfNeeded();
 
 	while (!quit)
 	{
-		displayStatusIfNeeded();
 		xd = 0;
 		yd = 0;
-		command = cgetc();
+		huntSuccess = 0;
+
+		do
+		{
+			command = cgetc();
+		} while (strchr("ijkln ", command) == NULL);
+
 		switch (command)
 		{
 		case 'i':
@@ -340,11 +352,11 @@ void gameLoop(char preyChance)
 		case 'l':
 			xd++;
 			break;
-		case ' ':
+		case 'n':
 		{
 			shouldUpdateStatus = true;
 			currentWolfIndex++;
-			if (currentWolfIndex >= numWolves)
+			if (currentWolfIndex >= wolfCount)
 			{
 				currentWolfIndex = 0;
 			}
@@ -352,43 +364,76 @@ void gameLoop(char preyChance)
 		default:
 			break;
 		}
-		moveWolf(currentWolfIndex, xd, yd);
+		huntSuccess = moveWolf(currentWolfIndex, xd, yd);
+		preyCaught += huntSuccess;
 		updateWolves();
-		if (xd || yd)
+
+		if (command != 'n')
 		{
-			packEnergy -= numWolves;
+			if (!huntSuccess)
+			{
+				packEnergy -= wolfCount;
+			}
 			servicePrey(preyChance);
 		}
+
+		if (packEnergy < 0 || preyCaught >= preyNeeded)
+		{
+			quit = true;
+		}
+
+		displayStatusIfNeeded();
 	}
 }
 
-void test()
+void runGame(char numTrees, char numBushes, char numWolves, char preyChance, char preyNeeded)
 {
-
 	char i;
 
-	for (i = 0; i < 20; i++)
+	setupScreen();
+
+	for (i = 0; i < numTrees; i++)
 	{
 		addScenery(it_tree);
 	}
 
-	for (i = 0; i < 20; i++)
+	for (i = 0; i < numBushes; i++)
 	{
 		addScenery(it_bush);
 	}
 
-	for (i = 0; i < 7; i++)
+	for (i = 0; i < numWolves; i++)
 	{
 		addWolf();
 	}
 
-	packEnergy = 500;
-
-	gameLoop(10);
+	gameLoop(preyChance, preyNeeded);
 }
 
 void main()
 {
+	level aLevel;
+	char level = 0;
+
 	init();
-	test();
+
+	do
+	{
+
+		if (level < 10)
+		{
+			aLevel = wLevels[level];
+
+			displayLevelTitleCard(level+1,&aLevel);
+
+			runGame(aLevel.numTrees,
+					aLevel.numBushes,
+					aLevel.numWolves,
+					aLevel.preyChance,
+					aLevel.preyNeeded);
+		}
+
+		++level;
+
+	} while (packEnergy >= 0);
 }

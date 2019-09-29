@@ -7,8 +7,7 @@ void setupScreen();
 void initMachineIO();
 char updateStatus(char *currentWolfName, char *statusLine);
 void displayPackEnergy(int packEnergy);
-
-void dbgNumPrey(char num);
+void displayLevelTitleCard(char num, level *aLevel);
 
 extern const char minX, minY;
 extern const char maxX, maxY;

@@ -16,6 +16,10 @@
 #define WOLFCOLOR BCOLOR_CYAN | CATTR_LUMA6
 #define PREYCOLOR BCOLOR_RED | CATTR_LUMA5
 
+const char color_levelTitle = BCOLOR_CYAN | CATTR_LUMA6 | CATTR_BLINK;
+const char color_levelDisplay = BCOLOR_PURPLE | CATTR_LUMA6;
+const char color_levelDescription = BCOLOR_GREEN | CATTR_LUMA5;
+
 const char preyC[] = {0, 0, 2, 65, 253, 63, 30, 54};
 const char wolfC[] = {0, 1, 65, 254, 62, 34, 34, 102};
 const char florC[] = {0, 4, 64, 0, 4, 0, 32, 1};
@@ -31,28 +35,16 @@ const char maxY = 22;
 
 itemType itemAtPos(char x, char y)
 {
-	return *(screen + x + (40 * y)) - 65;
+    return *(screen + x + (40 * y)) - 65;
 }
 
 void putItemAtPos(unsigned char x, unsigned char y, itemType item)
 {
-	char col;
-	*(screen + x + (40 * y)) = 65 + item;
-	item &= 0x7f; // delete rvs flag if set
-	col = colors[item];
-	*(COLOR_RAM + x + (40 * y)) = col;
-}
-
-void putCanvasItem(position *aPos, char item)
-{
-	putItemAtPos(aPos->x, aPos->y, item);
-}
-
-void displayThing(thing *aThing, char hilite)
-{
-	unsigned char dispChar;
-	dispChar = aThing->type + (hilite * 128);
-	putItemAtPos(aThing->pos.x, aThing->pos.y, dispChar);
+    char col;
+    *(screen + x + (40 * y)) = 65 + item;
+    item &= 0x7f; // delete rvs flag if set
+    col = colors[item];
+    *(COLOR_RAM + x + (40 * y)) = col;
 }
 
 void setupScreen()
@@ -106,11 +98,6 @@ void installChars()
 		*((unsigned char *)(0xf000 + (68 * 8) + i)) = bushC[i]; // 66 = "D" -- bush
 		*((unsigned char *)(0xf000 + (69 * 8) + i)) = treeC[i]; // 84 = "E" -- tree
 	}
-}
-
-void dbgNumPrey(char num)
-{
-	*(screen) = '0' + num;
 }
 
 void initMachineIO()

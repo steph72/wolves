@@ -22,6 +22,10 @@
 
 #define RAMCHARS 0xa000
 
+const char color_levelTitle = COLOR_CYAN;
+const char color_levelDisplay = COLOR_PURPLE;
+const char color_levelDescription = COLOR_GREEN;
+
 const char wolfC[] = {0, 1, 65, 254, 62, 34, 34, 102};
 const char preyC[] = {0, 0, 2, 65, 253, 63, 30, 54};
 const char treeC[] = {0, 44, 94, 110, 60, 24, 24, 25};
@@ -49,18 +53,6 @@ void putItemAtPos(unsigned char x, unsigned char y, itemType item)
 	*(COLOR_RAM + x + (40 * y)) = col;
 }
 
-void putCanvasItem(position *aPos, char item)
-{
-	putItemAtPos(aPos->x, aPos->y, item);
-}
-
-void displayThing(thing *aThing, char hilite)
-{
-	unsigned char dispChar;
-	dispChar = aThing->type + (hilite * 128);
-	putItemAtPos(aThing->pos.x, aThing->pos.y, dispChar);
-}
-
 void installCharset()
 {
 	char i;
@@ -86,11 +78,6 @@ void installCharset()
 		*((unsigned char *)(RAMCHARS + (68 * 8) + i)) = bushC[i];				  // 66 = "B"
 		*((unsigned char *)(RAMCHARS + (69 * 8) + i)) = treeC[i];				  // 84 = "T"
 	}
-}
-
-void dbgNumPrey(char num)
-{
-	*(screen) = '0' + num;
 }
 
 void setupScreen()

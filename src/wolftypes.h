@@ -4,10 +4,11 @@
 #define true 1
 #define false 0
 
-#define MAXPREY    32
-#define MAXWOLVES  10
+#define MAXPREY 32
+#define MAXWOLVES 10
 
-typedef enum _itemType {
+typedef enum _itemType
+{
 	it_prey,
 	it_wolf,
 	it_earth,
@@ -15,18 +16,21 @@ typedef enum _itemType {
 	it_tree
 } itemType;
 
-typedef enum _runmode {
-	wRunModeNone, 
-	wRunModeNormal, 
+typedef enum _runmode
+{
+	wRunModeNone,
+	wRunModeNormal,
 	wRunModeFlee
 } wRunMode;
 
-typedef struct _pos {
+typedef struct _pos
+{
 	char x;
 	char y;
 } position;
 
-typedef struct _thing {
+typedef struct _thing
+{
 	position pos;
 	wRunMode runmode;
 	itemType type;
@@ -34,5 +38,16 @@ typedef struct _thing {
 	struct _thing *next;
 	struct _thing *prev;
 } thing;
+
+typedef struct _level
+{
+	char bgColour;
+	char numWolves;
+	char numBushes;
+	char numTrees;
+	char preyChance;
+	char preyNeeded;
+	char *title;
+} level;
 
 #endif
