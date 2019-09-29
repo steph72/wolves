@@ -1,0 +1,9 @@
+{
+    "python.formatting.provider": "autopep8",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "files.associations": {
+        "plus4.h": "c",
+        "cbm264.h": "c"
+    }
+}
