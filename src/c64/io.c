@@ -3,6 +3,7 @@
 #include <string.h>
 #include <6502.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <c64.h>
 
 #define vicctl (unsigned char *)53265u
@@ -12,8 +13,6 @@
 #define procio (unsigned char *)1u
 #define kernalScreenPtr (unsigned char *)648u
 
-#define FRAMECOLOR 14
-
 #define EARTHCOLOR COLOR_BROWN
 #define BUSHCOLOR COLOR_ORANGE
 #define TREECOLOR COLOR_GREEN
@@ -22,6 +21,7 @@
 
 #define RAMCHARS 0xa000
 
+const char color_frame = COLOR_BLUE;
 const char color_levelTitle = COLOR_CYAN;
 const char color_levelDisplay = COLOR_PURPLE;
 const char color_levelDescription = COLOR_GREEN;
@@ -38,6 +38,16 @@ const char minX = 1;
 const char minY = 1;
 const char maxX = 38;
 const char maxY = 22;
+
+void waitCIATicks(char ticks)
+{
+	char i;
+	for (i = 0; i < ticks; ++i)
+	{
+		while (CIA1.ta_lo != 0)
+			;
+	}
+}
 
 itemType itemAtPos(char x, char y)
 {
@@ -72,6 +82,7 @@ void installCharset()
 	for (i = 0; i < 8; i++)
 	{
 		*((unsigned char *)(RAMCHARS + (65 * 8) + i)) = preyC[i];				  // 66 = "P"
+		*((unsigned char *)(RAMCHARS + ((65 + 128) * 8) + i)) = 255 - preyC[i];   // 66 = "P"
 		*((unsigned char *)(RAMCHARS + (66 * 8) + i)) = wolfC[i];				  // 87 = "W"
 		*((unsigned char *)(RAMCHARS + ((66 + 128) * 8) + i)) = 255 - (wolfC[i]); // 215 = inverse "W"
 		*((unsigned char *)(RAMCHARS + (67 * 8) + i)) = florC[i];				  // 69 = "E"
@@ -88,10 +99,10 @@ void setupScreen()
 	memset((COLOR_RAM + 40), EARTHCOLOR, 999 - 80);
 
 	memset((screen + 960), 160, 39);
-	memset((COLOR_RAM + 960), FRAMECOLOR, 39);
+	memset((COLOR_RAM + 960), color_frame, 39);
 
 	revers(1);
-	textcolor(FRAMECOLOR);
+	textcolor(color_frame);
 	gotoxy(31, 24);
 	cputs("pe:");
 	revers(0);
@@ -100,24 +111,24 @@ void setupScreen()
 	{
 		*(screen + i) = 64;
 		*(screen + 920 + i) = 64;
-		*(COLOR_RAM + i) = FRAMECOLOR;
-		*(COLOR_RAM + 920 + i) = FRAMECOLOR;
+		*(COLOR_RAM + i) = color_frame;
+		*(COLOR_RAM + 920 + i) = color_frame;
 	}
 	for (i = 1; i < 23; i++)
 	{
 		*(screen + (40 * i)) = 93;
 		*(screen + (40 * i) + 39) = 93;
-		*(COLOR_RAM + (40 * i)) = FRAMECOLOR;
-		*(COLOR_RAM + (40 * i) + 39) = FRAMECOLOR;
+		*(COLOR_RAM + (40 * i)) = color_frame;
+		*(COLOR_RAM + (40 * i) + 39) = color_frame;
 	}
 	*(screen) = 112;
 	*(screen + 39) = 110;
 	*(screen + 920) = 109;
 	*(screen + 920 + 39) = 125;
-	*(COLOR_RAM) = FRAMECOLOR;
-	*(COLOR_RAM + 39) = FRAMECOLOR;
-	*(COLOR_RAM + 920) = FRAMECOLOR;
-	*(COLOR_RAM + 920 + 39) = FRAMECOLOR;
+	*(COLOR_RAM) = color_frame;
+	*(COLOR_RAM + 39) = color_frame;
+	*(COLOR_RAM + 920) = color_frame;
+	*(COLOR_RAM + 920 + 39) = color_frame;
 }
 
 void initMachineIO()
@@ -131,7 +142,9 @@ void initMachineIO()
 	textcolor(2);
 	gotoxy(8, 0);
 	cprintf("%c", 211);
+	waitCIATicks(10);
 	installCharset();
+	srand(CIA1.ta_lo);
 }
 
 void restoreLowerFrame()
@@ -140,26 +153,7 @@ void restoreLowerFrame()
 	for (i = 1; i < 39; i++)
 	{
 		*(screen + i) = 64;
-		*(COLOR_RAM + i) = FRAMECOLOR;
-	}
-}
-
-void displayPackEnergy(int packEnergy)
-{
-	gotoxy(35, 24);
-	textcolor(FRAMECOLOR);
-	revers(1);
-	printf("%4d", packEnergy);
-	revers(0);
-}
-
-void waitCIATicks(char ticks)
-{
-	char i;
-	for (i = 0; i < ticks; ++i)
-	{
-		while (CIA1.ta_lo != 0)
-			;
+		*(COLOR_RAM + i) = color_frame;
 	}
 }
 
@@ -170,22 +164,22 @@ char updateStatus(char *currentWolfName, char *statusLine)
 	char shouldUpdateAgain;
 	shouldUpdateAgain = false;
 
-	memset((screen + 960), 160, 30);
-	memset((COLOR_RAM + 960), FRAMECOLOR, 30);
+	memset((screen + 960), 160, 20);
+	memset((COLOR_RAM + 960), color_frame, 20);
 
 	*(screen + 960) = 245;
 	*(screen + 960 + 39) = 246;
-	*(COLOR_RAM + 960) = FRAMECOLOR;
-	*(COLOR_RAM + 960 + 39) = FRAMECOLOR;
+	*(COLOR_RAM + 960) = color_frame;
+	*(COLOR_RAM + 960 + 39) = color_frame;
 	gotoxy(1, 24);
 	revers(1);
-	textcolor(FRAMECOLOR);
+	textcolor(color_frame);
 	cprintf("%s ", currentWolfName);
 	revers(0);
 	if (statusLine != NULL)
 	{
 		restoreLowerFrame();
-		textcolor(FRAMECOLOR);
+		textcolor(color_frame);
 		for (i = 0; i < 5; ++i)
 		{
 			rvs = !rvs;

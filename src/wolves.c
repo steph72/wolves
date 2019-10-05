@@ -5,11 +5,17 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <6502.h>
+#include <time.h>
 
 #include "wolftypes.h"
 #include "io.h"
 #include "utils.h"
 #include "levels.h"
+
+#define PE_PER_LEVEL     400
+#define PE_PER_PREY      100
+#define PE_MOVEMENT_COST  10
+#define PE_WAIT_COST       5
 
 const char *names[] = {"buba", "candor", "liza", "schnitzel", "darko", "coco", "ben", "tati", "lia", "tia", "laika"};
 char buf[40];
@@ -18,6 +24,7 @@ thing *preyHead;
 thing wolves[MAXWOLVES];
 
 int packEnergy;
+int score;
 
 char wolfCount;
 char numPrey;
@@ -119,8 +126,9 @@ void init()
 {
 	unsigned int i;
 	clrscr();
+	score = 0;
 	wolfCount = 0;
-	packEnergy = 500;
+	packEnergy = 0;
 	numPrey = 0;
 	preyHead = NULL;
 	for (i = 0; i < MAXWOLVES; i++)
@@ -222,6 +230,20 @@ void lookoutPrey(thing *aPrey)
 	}
 }
 
+void clearPrey(void)
+{
+	thing *currentPrey;
+	thing *delPrey;
+	currentPrey = preyHead;
+	while (currentPrey)
+	{
+		delPrey = currentPrey;
+		currentPrey = currentPrey->next;
+		removePrey(delPrey);
+	}
+	preyHead = NULL;
+}
+
 void servicePrey(char preyChance)
 {
 	thing *currentPrey;
@@ -256,7 +278,9 @@ void catchPrey(char wolfIdx, char x, char y)
 			removePrey(currentPrey);
 			sprintf(buf, "%s catches the prey!", names[wolfIdx]);
 			statusLine = buf;
-			packEnergy += 50;
+			packEnergy += PE_PER_PREY;
+			score += PE_PER_PREY;
+			displayScore(score);
 			return;
 		}
 		currentPrey = currentPrey->next;
@@ -325,6 +349,7 @@ void gameLoop(char preyChance, char preyNeeded)
 	quit = false;
 	currentWolfIndex = 0;
 	updateWolves();
+	displayScore(score);
 	displayStatusIfNeeded();
 
 	while (!quit)
@@ -370,10 +395,15 @@ void gameLoop(char preyChance, char preyNeeded)
 
 		if (command != 'n')
 		{
-			if (!huntSuccess)
+			if (xd || yd)
 			{
-				packEnergy -= wolfCount;
+				packEnergy -= PE_MOVEMENT_COST;
 			}
+			else
+			{
+				packEnergy -= PE_WAIT_COST;
+			}
+
 			servicePrey(preyChance);
 		}
 
@@ -384,6 +414,17 @@ void gameLoop(char preyChance, char preyNeeded)
 
 		displayStatusIfNeeded();
 	}
+
+	if (packEnergy >= 0)
+	{
+		sprintf(buf, "level complete. bonus: %d points", packEnergy);
+		statusLine = buf;
+		score += packEnergy;
+		displayScore(score);
+		displayStatusIfNeeded();
+		waitkey();
+	}
+
 }
 
 void runGame(char numTrees, char numBushes, char numWolves, char preyChance, char preyNeeded)
@@ -391,6 +432,10 @@ void runGame(char numTrees, char numBushes, char numWolves, char preyChance, cha
 	char i;
 
 	setupScreen();
+
+	clearPrey();
+
+	packEnergy += PE_PER_LEVEL;
 
 	for (i = 0; i < numTrees; i++)
 	{
@@ -424,7 +469,7 @@ void main()
 		{
 			aLevel = wLevels[level];
 
-			displayLevelTitleCard(level+1,&aLevel);
+			displayLevelTitleCard(level + 1, &aLevel);
 
 			runGame(aLevel.numTrees,
 					aLevel.numBushes,

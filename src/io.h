@@ -8,6 +8,7 @@ void initMachineIO();
 char updateStatus(char *currentWolfName, char *statusLine);
 void displayPackEnergy(int packEnergy);
 void displayLevelTitleCard(char num, level *aLevel);
+void displayScore(int score);
 
 extern const char minX, minY;
 extern const char maxX, maxY;
