@@ -12,10 +12,11 @@
 #include "utils.h"
 #include "levels.h"
 
-#define PE_PER_LEVEL     400
-#define PE_PER_PREY      100
-#define PE_MOVEMENT_COST  10
-#define PE_WAIT_COST       5
+#define PE_PER_LEVEL 100
+#define PE_PER_PREY 25
+#define PE_MOVEMENT_COST 2
+#define PE_WAIT_COST 1
+#define SCORE_PER_PREY 10
 
 const char *names[] = {"buba", "candor", "liza", "schnitzel", "darko", "coco", "ben", "tati", "lia", "tia", "laika"};
 char buf[40];
@@ -35,13 +36,15 @@ char *statusLine;
 char itemAtPos(char x, char y);
 void addScenery(char sc);
 
+void chooseRandomDest(thing *aPrey);
+
 void getFreePosition(position *aPos)
 {
 	char x, y;
 	do
 	{
-		x = minX + drand(maxX - minX - 1);
-		y = minY + drand(maxY - minY - 1);
+		x = minX + drand(maxX - minX + 1);
+		y = minY + drand(maxY - minY + 1);
 	} while (itemAtPos(x, y) != it_earth);
 	aPos->x = x;
 	aPos->y = y;
@@ -91,17 +94,77 @@ void addWolf()
 	newWolf->pos = newPos;
 }
 
+void getNewPreyPosition(position *aPos)
+{
+	char horizontalLock;
+	char x, y;
+
+	horizontalLock = drand(100) > 50;
+
+	if (drand(100) < 50)
+	{
+		x = minX;
+	}
+	else
+	{
+		x = maxX;
+	}
+
+	if (drand(100) < 50)
+	{
+		y = minY;
+	}
+	else
+	{
+		y = maxY;
+	}
+
+	do
+	{
+		if (horizontalLock)
+		{
+			x = minX + drand(maxX - minX - 1);
+		}
+		else
+		{
+			y = minY + drand(maxY - minY - 1);
+		}
+
+	} while (itemAtPos(x, y) != it_earth);
+
+	aPos->x = x;
+	aPos->y = y;
+}
+
 void addPrey()
 {
 	thing *prey;
 	position newPos;
 	prey = insertPreyAtHead();
-	getFreePosition(&newPos);
+	getNewPreyPosition(&newPos);
 	prey->pos = newPos;
 	prey->runmode = wRunModeNormal;
 	prey->type = it_prey; //  'a'+numPrey;
 	displayThing(prey, false);
 	numPrey++;
+	prey->movX = 0;
+	prey->movY = 0;
+	if (prey->pos.x == minX)
+	{
+		prey->movX = 1;
+	}
+	if (prey->pos.x == maxX)
+	{
+		prey->movX = -1;
+	}
+	if (prey->pos.y == minY)
+	{
+		prey->movY = 1;
+	}
+	if (prey->pos.y == maxY)
+	{
+		prey->movY = -1;
+	}
 }
 
 void removePrey(thing *aPrey)
@@ -149,21 +212,19 @@ char positionIsOffScreen(position *aPos)
 
 char isValidDestination(position *aPos)
 {
-	return (positionIsOffScreen(aPos) || (itemAtPos(aPos->x, aPos->y)) == it_earth);
+	return (positionIsOffScreen(aPos) ||
+			(itemAtPos(aPos->x, aPos->y)) == it_earth ||
+			(itemAtPos(aPos->x, aPos->y)) == it_bush);
 }
 
-void wanderPrey(thing *aPrey)
+void movePrey(thing *aPrey)
 {
-	signed char xdiff, ydiff;
 	position oldPos, newPos;
+
 	oldPos = aPrey->pos;
-	do
-	{
-		xdiff = -1 + drand(3);
-		ydiff = -1 + drand(3);
-		newPos.x = oldPos.x + xdiff;
-		newPos.y = oldPos.y + ydiff;
-	} while (!isValidDestination(&newPos));
+	newPos.x = oldPos.x + aPrey->movX;
+	newPos.y = oldPos.y + aPrey->movY;
+
 	putItemAtPos(oldPos.x, oldPos.y, it_earth);
 	if (positionIsOffScreen(&newPos))
 	{
@@ -175,6 +236,39 @@ void wanderPrey(thing *aPrey)
 		aPrey->pos = newPos;
 		displayThing(aPrey, false);
 	}
+}
+
+void chooseRandomDest(thing *aPrey)
+{
+	signed char xdiff, ydiff;
+	position oldPos, newPos;
+	oldPos = aPrey->pos;
+	do
+	{
+		xdiff = -1 + drand(3);
+		ydiff = -1 + drand(3);
+		newPos.x = oldPos.x + xdiff;
+		newPos.y = oldPos.y + ydiff;
+	} while (!isValidDestination(&newPos));
+
+	aPrey->movX = xdiff;
+	aPrey->movY = ydiff;
+}
+
+void wanderPrey(thing *aPrey)
+{
+	position oldPos, newPos;
+
+	oldPos = aPrey->pos;
+	newPos.x = aPrey->pos.x + aPrey->movX;
+	newPos.y = aPrey->pos.y + aPrey->movY;
+
+	if (!isValidDestination(&newPos))
+	{
+		chooseRandomDest(aPrey);
+	}
+
+	movePrey(aPrey);
 }
 
 void fleePrey(thing *aPrey)
@@ -192,7 +286,8 @@ void fleePrey(thing *aPrey)
 	{
 		aPrey->pos = newPos;
 		putItemAtPos(oldPos.x, oldPos.y, it_earth);
-		if (positionIsOffScreen(&newPos))
+		if (positionIsOffScreen(&newPos) ||
+			(itemAtPos(newPos.x, newPos.y)) == it_bush)
 		{
 			removePrey(aPrey);
 			statusLine = "prey got away!";
@@ -252,7 +347,10 @@ void servicePrey(char preyChance)
 	{
 		if (currentPrey->runmode == wRunModeNormal)
 		{
-			wanderPrey(currentPrey);
+			if (drand(100) > 25) // let prey eat once in a while
+			{
+				wanderPrey(currentPrey);
+			}
 			lookoutPrey(currentPrey);
 		}
 		else if (currentPrey->runmode == wRunModeFlee)
@@ -279,7 +377,7 @@ void catchPrey(char wolfIdx, char x, char y)
 			sprintf(buf, "%s catches the prey!", names[wolfIdx]);
 			statusLine = buf;
 			packEnergy += PE_PER_PREY;
-			score += PE_PER_PREY;
+			score += SCORE_PER_PREY;
 			displayScore(score);
 			return;
 		}
@@ -336,6 +434,57 @@ void displayStatusIfNeeded()
 	statusLine = NULL;
 }
 
+void nextWolf(char back)
+{
+
+	char idx;
+
+	int nextWolfDistance = 9999;
+	int prevWolfDistance = 9999;
+	char nextWolfIndex = currentWolfIndex;
+	char prevWolfIndex = currentWolfIndex;
+	int cwp; // current wolf position
+	int twp; // test wolf position
+	int dist;
+
+	cwp = (100 * wolves[currentWolfIndex].pos.x) + wolves[currentWolfIndex].pos.y;
+
+	for (idx = 0; idx < wolfCount; ++idx)
+	{
+
+		if (idx != currentWolfIndex)
+		{
+
+			twp = (100 * wolves[idx].pos.x) + wolves[idx].pos.y;
+			dist = abs(cwp - twp);
+			if (cwp - twp > 0)
+			{
+				if (dist < nextWolfDistance)
+				{
+					nextWolfDistance = dist;
+					nextWolfIndex = idx;
+				}
+			}
+			else
+			{
+				if (dist < prevWolfDistance)
+				{
+					prevWolfDistance = dist;
+					prevWolfIndex = idx;
+				}
+			}
+		}
+	}
+	if (back)
+	{
+		currentWolfIndex = nextWolfIndex;
+	}
+	else
+	{
+		currentWolfIndex = prevWolfIndex;
+	}
+}
+
 void gameLoop(char preyChance, char preyNeeded)
 {
 
@@ -361,7 +510,7 @@ void gameLoop(char preyChance, char preyNeeded)
 		do
 		{
 			command = cgetc();
-		} while (strchr("ijkln ", command) == NULL);
+		} while (strchr("ijklnb ", command) == NULL);
 
 		switch (command)
 		{
@@ -380,11 +529,14 @@ void gameLoop(char preyChance, char preyNeeded)
 		case 'n':
 		{
 			shouldUpdateStatus = true;
-			currentWolfIndex++;
-			if (currentWolfIndex >= wolfCount)
-			{
-				currentWolfIndex = 0;
-			}
+			nextWolf(false);
+			break;
+		}
+		case 'b':
+		{
+			shouldUpdateStatus = true;
+			nextWolf(true);
+			break;
 		}
 		default:
 			break;
@@ -393,7 +545,7 @@ void gameLoop(char preyChance, char preyNeeded)
 		preyCaught += huntSuccess;
 		updateWolves();
 
-		if (command != 'n')
+		if (command != 'n' && command != 'b')
 		{
 			if (xd || yd)
 			{
@@ -424,7 +576,6 @@ void gameLoop(char preyChance, char preyNeeded)
 		displayStatusIfNeeded();
 		waitkey();
 	}
-
 }
 
 void runGame(char numTrees, char numBushes, char numWolves, char preyChance, char preyNeeded)

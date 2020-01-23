@@ -4,6 +4,13 @@
     "python.linting.pylintEnabled": true,
     "files.associations": {
         "plus4.h": "c",
-        "cbm264.h": "c"
+        "cbm264.h": "c",
+        "cx16.h": "c",
+        "wolftypes.h": "c",
+        "io.h": "c",
+        "utils.h": "c",
+        "levels.h": "c",
+        "time.h": "c",
+        "6502.h": "c"
     }
 }

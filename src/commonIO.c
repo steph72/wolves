@@ -73,4 +73,5 @@ void displayLevelTitleCard(char num, level *aLevel)
     center(buf);
     puts("\n\n");
     cgetc();
+    clrscr();
 }

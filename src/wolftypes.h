@@ -34,6 +34,8 @@ typedef struct _thing
 	position pos;
 	wRunMode runmode;
 	itemType type;
+	char movX;
+	char movY;
 	struct _thing *hunter;
 	struct _thing *next;
 	struct _thing *prev;
