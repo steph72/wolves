@@ -30,7 +30,7 @@ const char colors[] = {PREYCOLOR, WOLFCOLOR, EARTHCOLOR, BUSHCOLOR, TREECOLOR};
 const char minX = 1;
 const char minY = 1;
 const char maxX = 38;
-const char maxY = 22;
+const char maxY = 28;
 
 void waitCIATicks(char ticks)
 {
@@ -50,19 +50,36 @@ itemType itemAtPos(char x, char y)
 
 void putItemAtPos(unsigned char x, unsigned char y, itemType item)
 {
+	char col;
 	vpoke(65 + item, (x * 2) + (256 * y));
+	item &= 0x7f; // delete rvs flag if set
+	col = colors[item];
+	vpoke(col, 1 + (x * 2) + (256 * y));
 }
 
 void installCharset()
 {
+	unsigned char i;
+	const long charset = 0x0f800;
+
+	for (i = 0; i < 8; ++i)
+	{
+		vpoke(preyC[i], charset + (65 * 8) + i);
+		vpoke(255 - preyC[i], charset + ((128 + 65) * 8) + i);
+		vpoke(wolfC[i], charset + (66 * 8) + i);
+		vpoke(255 - wolfC[i], charset + ((128 + 66) * 8) + i);
+		vpoke(florC[i], charset + (67 * 8) + i);
+		vpoke(bushC[i], charset + (68 * 8) + i);
+		vpoke(treeC[i], charset + (69 * 8) + i);
+	}
 }
 
 void setupScreen()
 {
 	register int x, y;
-	for (x = 1; x < 39; ++x)
+	for (x = minX; x <= maxX; ++x)
 	{
-		for (y = 1; y < 24; ++y)
+		for (y = minY; y <=maxY ; ++y)
 		{
 			vpoke(65 + it_earth, (x * 2) + (256 * y));
 		}
@@ -71,6 +88,7 @@ void setupScreen()
 
 void initMachineIO()
 {
+
 	videomode(VIDEOMODE_40COL);
 
 	cbm_k_bsout(0x8e); // select graphic charset
@@ -79,7 +97,6 @@ void initMachineIO()
 	bordercolor(0);
 	textcolor(5);
 	clrscr();
-
 	installCharset();
 	srand(VIA1.t1_lo);
 }
@@ -95,7 +112,7 @@ char updateStatus(char *currentWolfName, char *statusLine)
 	char shouldUpdateAgain;
 	shouldUpdateAgain = false;
 
-	gotoxy(1, 24);
+	gotoxy(1, maxY+1);
 	revers(1);
 	textcolor(color_frame);
 	cprintf("%s ", currentWolfName);
