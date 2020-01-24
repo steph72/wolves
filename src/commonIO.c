@@ -14,9 +14,9 @@ extern const char color_frame;
 void displayPackEnergy(int packEnergy)
 {
     revers(1);
-    gotoxy(30, 24);
+    gotoxy(30, maxY+1);
     cputs("        ");
-    gotoxy(30, 24);
+    gotoxy(30, maxY+1);
     textcolor(color_frame);
     printf("pe: %d", packEnergy);
     revers(0);
@@ -24,7 +24,7 @@ void displayPackEnergy(int packEnergy)
 
 void displayScore(int score)
 {
-    gotoxy(20, 24);
+    gotoxy(20, maxY+1);
     textcolor(color_frame);
     revers(1);
     printf("s: %d", score);
@@ -56,7 +56,7 @@ void displayLevelTitleCard(char num, level *aLevel)
     clrscr();
     textcolor(color_frame);
     chlinexy(0, 0, 40);
-    chlinexy(0, 24, 40);
+    chlinexy(0, maxY+1, 40);
     gotoxy(0, 3);
     textcolor(color_levelDisplay);
     sprintf(buf, "** level %d **", num);
