@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cx16.h>
+#include <time.h>
 
 #define EARTHCOLOR COLOR_BROWN
 #define BUSHCOLOR COLOR_ORANGE
@@ -32,11 +33,15 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 28;
 
-void waitCIATicks(char ticks)
+unsigned char wtitle[];
+void center(char *aString);
+
+void waitTicks(char ticks)
 {
-	char i;
-	return;
-	for (i = 0; i < ticks; ++i)
+	int i;
+	int cx16ticks;
+	cx16ticks = ticks*24;
+	for (i = 0; i < cx16ticks; ++i)
 	{
 		while (VIA1.t1_lo != 0)
 			;
@@ -79,18 +84,47 @@ void setupScreen()
 	register int x, y;
 	for (x = minX; x <= maxX; ++x)
 	{
-		for (y = minY; y <=maxY ; ++y)
+		for (y = minY; y <= maxY; ++y)
 		{
 			vpoke(65 + it_earth, (x * 2) + (256 * y));
+			vpoke(colors[it_earth], 1 + (x * 2) + (256 * y));
 		}
 	}
+	textcolor(color_frame);
+	cvlinexy(minX - 1, minY, maxY - minY + 1);
+	cvlinexy(maxX + 1, minY, maxY - minY + 1);
+	chlinexy(minX, maxY + 1, maxX - minX + 1);
+	cputcxy(0, 0, 176); // corners
+	cputcxy(maxX + 1, 0, 174);
+	cputcxy(0, maxY + 1, 173);
+	cputcxy(maxX + 1, maxY + 1, 189);
 }
+
+void title(void) {
+	unsigned char* current;
+	int adr;
+	unsigned char x = 255;
+	adr = 0;
+	current = wtitle;
+	do {
+		if (++x==40) {
+			adr += 0x100;
+			x=0;
+		}			
+		vpoke(*current++, (x * 2) + adr);
+	} while (*current!=0xff);
+	gotoxy(0,14);
+	center ("a strategy game for the cx16");
+	center ("by stephan kleinert");
+	gotoxy(0,18);
+	center ("hit 'i' for instructions or");
+	center ("any other key to start the game");
+}
+
 
 void initMachineIO()
 {
-
 	videomode(VIDEOMODE_40COL);
-
 	cbm_k_bsout(0x8e); // select graphic charset
 	cbm_k_bsout(0x08); // disable c= + shift
 	bgcolor(0);
@@ -99,10 +133,16 @@ void initMachineIO()
 	clrscr();
 	installCharset();
 	srand(VIA1.t1_lo);
+	title();
+	cgetc();
 }
 
-void restoreLowerFrame()
+
+
+void restoreMessageSpace()
 {
+	textcolor(color_frame);
+	chlinexy(minX, minY - 1, maxX - minX + 1);
 }
 
 char updateStatus(char *currentWolfName, char *statusLine)
@@ -112,14 +152,15 @@ char updateStatus(char *currentWolfName, char *statusLine)
 	char shouldUpdateAgain;
 	shouldUpdateAgain = false;
 
-	gotoxy(1, maxY+1);
+	gotoxy(minX + 1, maxY + 1);
 	revers(1);
 	textcolor(color_frame);
-	cprintf("%s ", currentWolfName);
+	cprintf("%s", currentWolfName);
 	revers(0);
+	chlinexy(minX + strlen(currentWolfName) + 1, maxY + 1, 18 - strlen(currentWolfName) - 2);
 	if (statusLine != NULL)
 	{
-		restoreLowerFrame();
+		restoreMessageSpace();
 		textcolor(color_frame);
 		for (i = 0; i < 5; ++i)
 		{
@@ -127,7 +168,7 @@ char updateStatus(char *currentWolfName, char *statusLine)
 			gotoxy(2, 0);
 			revers(rvs);
 			cprintf(statusLine);
-			waitCIATicks(10);
+			waitTicks(10);
 		}
 		statusLine = NULL;
 		shouldUpdateAgain = true;
@@ -135,7 +176,7 @@ char updateStatus(char *currentWolfName, char *statusLine)
 	}
 	else
 	{
-		restoreLowerFrame();
+		restoreMessageSpace();
 	}
 	return shouldUpdateAgain;
 }

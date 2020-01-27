@@ -39,7 +39,7 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 22;
 
-void waitCIATicks(char ticks)
+void waitTicks(char ticks)
 {
 	char i;
 	for (i = 0; i < ticks; ++i)
@@ -142,7 +142,7 @@ void initMachineIO()
 	textcolor(2);
 	gotoxy(8, 0);
 	cprintf("%c", 211);
-	waitCIATicks(10);
+	waitTicks(10);
 	installCharset();
 	srand(CIA1.ta_lo);
 }
@@ -186,7 +186,7 @@ char updateStatus(char *currentWolfName, char *statusLine)
 			gotoxy(2, 0);
 			revers(rvs);
 			cprintf(statusLine);
-			waitCIATicks(10);
+			waitTicks(10);
 		}
 		statusLine = NULL;
 		shouldUpdateAgain = true;
