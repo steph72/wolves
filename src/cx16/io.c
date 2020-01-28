@@ -15,7 +15,7 @@
 
 #define RAMCHARS 0xa000
 
-const char color_frame = COLOR_BLUE;
+const char color_frame = COLOR_LIGHTBLUE;
 const char color_levelTitle = COLOR_CYAN;
 const char color_levelDisplay = COLOR_PURPLE;
 const char color_levelDescription = COLOR_GREEN;
@@ -143,40 +143,4 @@ void restoreMessageSpace()
 {
 	textcolor(color_frame);
 	chlinexy(minX, minY - 1, maxX - minX + 1);
-}
-
-char updateStatus(char *currentWolfName, char *statusLine)
-{
-	unsigned char i;
-	char rvs;
-	char shouldUpdateAgain;
-	shouldUpdateAgain = false;
-
-	gotoxy(minX + 1, maxY + 1);
-	revers(1);
-	textcolor(color_frame);
-	cprintf("%s", currentWolfName);
-	revers(0);
-	chlinexy(minX + strlen(currentWolfName) + 1, maxY + 1, 18 - strlen(currentWolfName) - 2);
-	if (statusLine != NULL)
-	{
-		restoreMessageSpace();
-		textcolor(color_frame);
-		for (i = 0; i < 5; ++i)
-		{
-			rvs = !rvs;
-			gotoxy(2, 0);
-			revers(rvs);
-			cprintf(statusLine);
-			waitTicks(10);
-		}
-		statusLine = NULL;
-		shouldUpdateAgain = true;
-		revers(0);
-	}
-	else
-	{
-		restoreMessageSpace();
-	}
-	return shouldUpdateAgain;
 }

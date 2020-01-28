@@ -11,6 +11,10 @@ extern const char color_levelDisplay;
 extern const char color_levelDescription;
 extern const char color_frame;
 
+void restoreMessageSpace();
+void waitTicks();
+
+
 void displayPackEnergy(int packEnergy)
 {
     revers(1);
@@ -74,4 +78,41 @@ void displayLevelTitleCard(char num, level *aLevel)
     puts("\n\n");
     cgetc();
     clrscr();
+}
+
+
+char updateStatus(char *currentWolfName, char *statusLine)
+{
+	unsigned char i;
+	char rvs;
+	char shouldUpdateAgain;
+	shouldUpdateAgain = false;
+
+	gotoxy(minX + 1, maxY + 1);
+	revers(1);
+	textcolor(color_frame);
+	cprintf("%s", currentWolfName);
+	revers(0);
+	chlinexy(minX + strlen(currentWolfName) + 1, maxY + 1, 18 - strlen(currentWolfName) - 2);
+	if (statusLine != NULL)
+	{
+		restoreMessageSpace();
+		textcolor(color_frame);
+		for (i = 0; i < 5; ++i)
+		{
+			rvs = !rvs;
+			gotoxy(2, 0);
+			revers(rvs);
+			cprintf(statusLine);
+			waitTicks(10);
+		}
+		statusLine = NULL;
+		shouldUpdateAgain = true;
+		revers(0);
+	}
+	else
+	{
+		restoreMessageSpace();
+	}
+	return shouldUpdateAgain;
 }

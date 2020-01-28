@@ -35,7 +35,10 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 22;
 
-void waitTedTicks(char t)
+void restoreMessageSpace();
+
+
+void waitTicks(char t)
 {
 	char i;
 	for (i = 0; i < t; ++i)
@@ -82,12 +85,7 @@ void setupScreen()
 
 	memset((screen + 960), 160, 39);
 	memset((COLOR_RAM + 960), color_frame, 39);
-
-	textcolor(color_frame);
-	revers(1);
-	gotoxy(31, 24);
-	cputs("pe:");
-	revers(0);
+	
 
 	for (i = 1; i < 39; i++)
 	{
@@ -137,13 +135,13 @@ void initMachineIO()
 	textcolor(0x52);
 	gotoxy(8, 0);
 	cprintf("%c", 211);
-	waitTedTicks(7);
+	waitTicks(7);
 	copychars();
 	installChars();
 	srand(TED.t1_lo);
 }
 
-void restoreLowerFrame()
+void restoreMessageSpace()
 {
 	char i;
 	for (i = 1; i < 39; i++)
@@ -153,45 +151,3 @@ void restoreLowerFrame()
 	}
 }
 
-
-char updateStatus(char *currentWolfName, char *statusLine)
-{
-	char shouldUpdateAgain;
-	char i;
-	char rvs = 1;
-	shouldUpdateAgain = false;
-
-	memset((screen + 960), 160, 20);
-	memset((COLOR_RAM + 960), color_frame, 20);
-
-	*(screen + 960) = 245;
-	*(screen + 960 + 39) = 246;
-	*(COLOR_RAM + 960) = color_frame;
-	*(COLOR_RAM + 960 + 39) = color_frame;
-	gotoxy(1, 24);
-	revers(1);
-	textcolor(color_frame);
-	cprintf("%s ", currentWolfName);
-	revers(0);
-	if (statusLine != NULL)
-	{
-		restoreLowerFrame();
-		textcolor(color_frame);
-		for (i = 0; i < 5; ++i)
-		{
-			rvs = !rvs;
-			gotoxy(2, 0);
-			revers(rvs);
-			cprintf(statusLine);
-			waitTedTicks(5);
-		}
-		statusLine = NULL;
-		shouldUpdateAgain = true;
-		revers(0);
-	}
-	else
-	{
-		restoreLowerFrame();
-	}
-	return shouldUpdateAgain;
-}
