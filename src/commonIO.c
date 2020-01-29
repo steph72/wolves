@@ -14,23 +14,24 @@ extern const char color_frame;
 void restoreMessageSpace();
 void waitTicks();
 
-void drawFrame() {
+void drawFrame()
+{
     textcolor(color_frame);
-	cvlinexy(minX - 1, minY, maxY - minY + 1);
-	cvlinexy(maxX + 1, minY, maxY - minY + 1);
-	chlinexy(minX, maxY + 1, maxX - minX + 1);
-	cputcxy(0, 0, 176); // corners
-	cputcxy(maxX + 1, 0, 174);
-	cputcxy(0, maxY + 1, 173);
-	cputcxy(maxX + 1, maxY + 1, 189);
+    cvlinexy(minX - 1, minY, maxY - minY + 1);
+    cvlinexy(maxX + 1, minY, maxY - minY + 1);
+    chlinexy(minX, maxY + 1, maxX - minX + 1);
+    cputcxy(0, 0, 176); // corners
+    cputcxy(maxX + 1, 0, 174);
+    cputcxy(0, maxY + 1, 173);
+    cputcxy(maxX + 1, maxY + 1, 189);
 }
 
 void displayPackEnergy(int packEnergy)
 {
     revers(1);
-    gotoxy(30, maxY+1);
+    gotoxy(30, maxY + 1);
     cputs("        ");
-    gotoxy(30, maxY+1);
+    gotoxy(30, maxY + 1);
     textcolor(color_frame);
     printf("pe: %d", packEnergy);
     revers(0);
@@ -38,7 +39,7 @@ void displayPackEnergy(int packEnergy)
 
 void displayScore(int score)
 {
-    gotoxy(20, maxY+1);
+    gotoxy(20, maxY + 1);
     textcolor(color_frame);
     revers(1);
     printf("s: %d", score);
@@ -70,7 +71,7 @@ void displayLevelTitleCard(char num, level *aLevel)
     clrscr();
     textcolor(color_frame);
     chlinexy(0, 0, 40);
-    chlinexy(0, maxY+1, 40);
+    chlinexy(0, maxY + 1, 40);
     gotoxy(0, 3);
     textcolor(color_levelDisplay);
     sprintf(buf, "** level %d **", num);
@@ -90,46 +91,53 @@ void displayLevelTitleCard(char num, level *aLevel)
     clrscr();
 }
 
-
 char updateStatus(char *currentWolfName, char *statusLine)
 {
-	unsigned char i;
-	char rvs;
-	char shouldUpdateAgain;
-	shouldUpdateAgain = false;
+    unsigned char i;
+    char rvs;
+    char shouldUpdateAgain;
+    shouldUpdateAgain = false;
 
-	gotoxy(minX + 1, maxY + 1);
-	revers(1);
-	textcolor(color_frame);
-	cprintf("%s", currentWolfName);
-	revers(0);
-	chlinexy(minX + strlen(currentWolfName) + 1, maxY + 1, 18 - strlen(currentWolfName) - 2);
-	if (statusLine != NULL)
-	{
-		restoreMessageSpace();
-		textcolor(color_frame);
-		for (i = 0; i < 5; ++i)
-		{
-			rvs = !rvs;
-			gotoxy(2, 0);
-			revers(rvs);
-			cprintf(statusLine);
-			waitTicks(10);
-		}
-		statusLine = NULL;
-		shouldUpdateAgain = true;
-		revers(0);
-	}
-	else
-	{
-		restoreMessageSpace();
-	}
-	return shouldUpdateAgain;
+    gotoxy(minX + 1, maxY + 1);
+    revers(1);
+    textcolor(color_frame);
+    cprintf("%s", currentWolfName);
+    revers(0);
+    chlinexy(minX + strlen(currentWolfName) + 1, maxY + 1, 18 - strlen(currentWolfName) - 2);
+    if (statusLine != NULL)
+    {
+        restoreMessageSpace();
+        textcolor(color_frame);
+        for (i = 0; i < 5; ++i)
+        {
+            rvs = !rvs;
+            gotoxy(2, 0);
+            revers(rvs);
+            cprintf(statusLine);
+            waitTicks(10);
+        }
+        statusLine = NULL;
+        shouldUpdateAgain = true;
+        revers(0);
+    }
+    else
+    {
+        restoreMessageSpace();
+    }
+    return shouldUpdateAgain;
 }
-
 
 void restoreMessageSpace()
 {
-	textcolor(color_frame);
-	chlinexy(minX, minY - 1, maxX - minX + 1);
+    textcolor(color_frame);
+    chlinexy(minX, minY - 1, maxX - minX + 1);
+}
+
+void titlePrompt()
+{
+    center("written by stephan kleinert");
+    center("(c) 2020 7turtles software");
+    cputs("\r\n");
+    center("hit 'i' for instructions or");
+    center("any other key to start the game");
 }

@@ -1,4 +1,5 @@
 #include "../wolftypes.h"
+#include "../io.h"
 #include <conio.h>
 #include <string.h>
 #include <6502.h>
@@ -34,13 +35,12 @@ const char maxX = 38;
 const char maxY = 28;
 
 unsigned char wtitle[];
-void center(char *aString);
 
 void waitTicks(char ticks)
 {
 	int i;
 	int cx16ticks;
-	cx16ticks = ticks*24;
+	cx16ticks = ticks * 24;
 	for (i = 0; i < cx16ticks; ++i)
 	{
 		while (VIA1.t1_lo != 0)
@@ -100,31 +100,46 @@ void setupScreen()
 	cputcxy(maxX + 1, maxY + 1, 189);
 }
 
-void title(void) {
-	unsigned char* current;
+void title(void)
+{
+	unsigned char *current;
 	int adr;
+	unsigned char currentColor;
+	unsigned char lineCount = 0;
+	unsigned char columnCount = 0;
+	unsigned char colors[] = {COLOR_BLUE,COLOR_BLUE,COLOR_LIGHTBLUE,COLOR_LIGHTBLUE,COLOR_CYAN};
+	unsigned char i = 0;
 	unsigned char x = 255;
+
+	textcolor(COLOR_GRAY2);
+	clrscr();
+
 	adr = 0;
 	current = wtitle;
-	do {
-		if (++x==40) {
-			adr += 0x100;
-			x=0;
-		}			
-		vpoke(*current++, (x * 2) + adr);
-	} while (*current!=0xff);
-	gotoxy(0,14);
-	center ("a strategy game for the cx16");
-	center ("by stephan kleinert");
-	gotoxy(0,18);
-	center ("hit 'i' for instructions or");
-	center ("any other key to start the game");
-}
 
+	do
+	{
+		if (++x == 40)
+		{
+			adr += 0x100;
+			x = 0;
+		}
+		vpoke(*current++, (x * 2) + adr);
+	} while (*current != 0xff);
+
+	for (lineCount = 0; lineCount < 5; ++lineCount)
+	{
+		currentColor = colors[lineCount];
+		for (columnCount = 0; columnCount < 40; columnCount++)
+		{
+			vpoke(currentColor,1+(columnCount*2)+((5+lineCount)*0x100));
+		}
+	}
+}
 
 void initMachineIO()
 {
-	videomode(VIDEOMODE_40COL);
+	videomode(VIDEOMODE_40x30);
 	cbm_k_bsout(0x8e); // select graphic charset
 	cbm_k_bsout(0x08); // disable c= + shift
 	bgcolor(0);
@@ -134,7 +149,7 @@ void initMachineIO()
 	installCharset();
 	srand(VIA1.t1_lo);
 	title();
+	gotoxy(0, 14);
+	titlePrompt();
 	cgetc();
 }
-
-

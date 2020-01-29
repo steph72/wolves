@@ -1,4 +1,5 @@
 #include "../wolftypes.h"
+#include "../io.h"
 #include "charset.h"
 #include <conio.h>
 #include <6502.h>
@@ -35,6 +36,8 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 22;
 
+unsigned char wtitle[];
+
 
 void waitTicks(char t)
 {
@@ -42,12 +45,11 @@ void waitTicks(char t)
 	for (i = 0; i < t; ++i)
 	{
 		TED.t1_lo = 0;
-		TED.t1_hi = 60;
+		TED.t1_hi = 10;
 		while (TED.t1_hi != 0)
 			;
 	}
 }
-
 
 itemType itemAtPos(char x, char y)
 {
@@ -56,7 +58,7 @@ itemType itemAtPos(char x, char y)
 
 void putItemAtPos(unsigned char x, unsigned char y, itemType item)
 {
-	char blink=0;
+	char blink = 0;
 	char col;
 
 	if ((item & 0x7f) == it_wolf)
@@ -81,32 +83,7 @@ void setupScreen()
 	memset((screen + 40), it_earth + 65, 999 - 80);
 	memset((COLOR_RAM + 40), EARTHCOLOR, 999 - 80);
 
-	memset((screen + 960), 160, 39);
-	memset((COLOR_RAM + 960), color_frame, 39);
-	
-
-	for (i = 1; i < 39; i++)
-	{
-		*(screen + i) = 64;
-		*(screen + 920 + i) = 64;
-		*(COLOR_RAM + i) = color_frame;
-		*(COLOR_RAM + 920 + i) = color_frame;
-	}
-	for (i = 1; i < 23; i++)
-	{
-		*(screen + (40 * i)) = 93;
-		*(screen + (40 * i) + 39) = 93;
-		*(COLOR_RAM + (40 * i)) = color_frame;
-		*(COLOR_RAM + (40 * i) + 39) = color_frame;
-	}
-	*(screen) = 112;
-	*(screen + 39) = 110;
-	*(screen + 920) = 109;
-	*(screen + 920 + 39) = 125;
-	*(COLOR_RAM) = color_frame;
-	*(COLOR_RAM + 39) = color_frame;
-	*(COLOR_RAM + 920) = color_frame;
-	*(COLOR_RAM + 920 + 39) = color_frame;
+	drawFrame();
 }
 
 void installChars()
@@ -120,6 +97,35 @@ void installChars()
 		*((unsigned char *)(0xf000 + (68 * 8) + i)) = bushC[i]; // 66 = "D" -- bush
 		*((unsigned char *)(0xf000 + (69 * 8) + i)) = treeC[i]; // 84 = "E" -- tree
 	}
+}
+
+void title()
+{
+	unsigned char *current;
+	unsigned char *cScreen;
+	unsigned char *cColor;
+	unsigned char currentColor;
+	unsigned char lineCount = 0;
+	unsigned char columnCount=0;
+	unsigned char colors[] = {BCOLOR_PURPLE,BCOLOR_DARKBLUE,BCOLOR_LIGHTBLUE,BCOLOR_LIGHTBLUE,BCOLOR_CYAN};
+
+	textcolor(BCOLOR_WHITE | CATTR_LUMA1);
+	clrscr();
+
+	// TED rules!
+	for (lineCount=0;lineCount<5;++lineCount) {
+		currentColor = colors[lineCount]+0x00+(lineCount*0x10);
+		for (columnCount=0;columnCount<40;columnCount++) {
+			*(COLOR_RAM+((5+lineCount)*40)+columnCount) = currentColor;
+		}
+	}
+
+	cScreen = screen;
+	current = wtitle;
+	do
+	{
+		*cScreen++ = *current++;
+	} while (*current != 0xff);
 }
 
 void initMachineIO()
@@ -137,4 +143,9 @@ void initMachineIO()
 	copychars();
 	installChars();
 	srand(TED.t1_lo);
+	title();
+	gotoxy(0,14);
+	textcolor(BCOLOR_CYAN|CATTR_LUMA3);
+	titlePrompt();
+	cgetc();
 }

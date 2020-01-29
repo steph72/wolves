@@ -1,4 +1,5 @@
 #include "../wolftypes.h"
+#include "../io.h"
 #include <conio.h>
 #include <string.h>
 #include <6502.h>
@@ -39,7 +40,7 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 23;
 
-void drawFrame();
+unsigned char wtitle[];
 
 void waitTicks(char ticks)
 {
@@ -95,12 +96,37 @@ void installCharset()
 
 void setupScreen()
 {
-
 	memset((screen + 40), it_earth + 65, 999 - 40);
 	memset((COLOR_RAM + 40), EARTHCOLOR, 999 - 40);
-
 	drawFrame();
+}
 
+void title()
+{
+	unsigned char *current;
+	unsigned char *cScreen;
+	unsigned char *cColor;
+	unsigned char currentColor;
+	unsigned char lineCount = 0;
+	unsigned char columnCount=0;
+	unsigned char colors[] = {COLOR_BLUE,COLOR_BLUE,COLOR_LIGHTBLUE,COLOR_LIGHTBLUE,COLOR_CYAN};
+
+	textcolor(COLOR_GRAY1);
+	clrscr();
+
+	for (lineCount=0;lineCount<5;++lineCount) {
+		currentColor = colors[lineCount];
+		for (columnCount=0;columnCount<40;columnCount++) {
+			*(COLOR_RAM+((5+lineCount)*40)+columnCount) = currentColor;
+		}
+	}
+
+	cScreen = screen;
+	current = wtitle;
+	do
+	{
+		*cScreen++ = *current++;
+	} while (*current != 0xff);
 }
 
 void initMachineIO()
@@ -117,4 +143,8 @@ void initMachineIO()
 	waitTicks(10);
 	installCharset();
 	srand(CIA1.ta_lo);
+	title();
+	gotoxy(0,15);
+	titlePrompt();
+	cgetc();
 }
