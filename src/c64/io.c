@@ -37,9 +37,9 @@ const char colors[] = {PREYCOLOR, WOLFCOLOR, EARTHCOLOR, BUSHCOLOR, TREECOLOR};
 const char minX = 1;
 const char minY = 1;
 const char maxX = 38;
-const char maxY = 22;
+const char maxY = 23;
 
-void restoreMessageSpace();
+void drawFrame();
 
 void waitTicks(char ticks)
 {
@@ -95,36 +95,12 @@ void installCharset()
 
 void setupScreen()
 {
-	char i;
 
-	memset((screen + 40), it_earth + 65, 999 - 80);
-	memset((COLOR_RAM + 40), EARTHCOLOR, 999 - 80);
+	memset((screen + 40), it_earth + 65, 999 - 40);
+	memset((COLOR_RAM + 40), EARTHCOLOR, 999 - 40);
 
-	memset((screen + 960), 160, 39);
-	memset((COLOR_RAM + 960), color_frame, 39);
+	drawFrame();
 
-	for (i = 1; i < 39; i++)
-	{
-		*(screen + i) = 64;
-		*(screen + 920 + i) = 64;
-		*(COLOR_RAM + i) = color_frame;
-		*(COLOR_RAM + 920 + i) = color_frame;
-	}
-	for (i = 1; i < 23; i++)
-	{
-		*(screen + (40 * i)) = 93;
-		*(screen + (40 * i) + 39) = 93;
-		*(COLOR_RAM + (40 * i)) = color_frame;
-		*(COLOR_RAM + (40 * i) + 39) = color_frame;
-	}
-	*(screen) = 112;
-	*(screen + 39) = 110;
-	*(screen + 920) = 109;
-	*(screen + 920 + 39) = 125;
-	*(COLOR_RAM) = color_frame;
-	*(COLOR_RAM + 39) = color_frame;
-	*(COLOR_RAM + 920) = color_frame;
-	*(COLOR_RAM + 920 + 39) = color_frame;
 }
 
 void initMachineIO()
@@ -141,14 +117,4 @@ void initMachineIO()
 	waitTicks(10);
 	installCharset();
 	srand(CIA1.ta_lo);
-}
-
-void restoreMessageSpace()
-{
-	char i;
-	for (i = 1; i < 39; i++)
-	{
-		*(screen + i) = 64;
-		*(COLOR_RAM + i) = color_frame;
-	}
 }

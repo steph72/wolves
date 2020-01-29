@@ -14,6 +14,16 @@ extern const char color_frame;
 void restoreMessageSpace();
 void waitTicks();
 
+void drawFrame() {
+    textcolor(color_frame);
+	cvlinexy(minX - 1, minY, maxY - minY + 1);
+	cvlinexy(maxX + 1, minY, maxY - minY + 1);
+	chlinexy(minX, maxY + 1, maxX - minX + 1);
+	cputcxy(0, 0, 176); // corners
+	cputcxy(maxX + 1, 0, 174);
+	cputcxy(0, maxY + 1, 173);
+	cputcxy(maxX + 1, maxY + 1, 189);
+}
 
 void displayPackEnergy(int packEnergy)
 {
@@ -115,4 +125,11 @@ char updateStatus(char *currentWolfName, char *statusLine)
 		restoreMessageSpace();
 	}
 	return shouldUpdateAgain;
+}
+
+
+void restoreMessageSpace()
+{
+	textcolor(color_frame);
+	chlinexy(minX, minY - 1, maxX - minX + 1);
 }

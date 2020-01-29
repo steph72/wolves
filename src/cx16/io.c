@@ -138,9 +138,3 @@ void initMachineIO()
 }
 
 
-
-void restoreMessageSpace()
-{
-	textcolor(color_frame);
-	chlinexy(minX, minY - 1, maxX - minX + 1);
-}

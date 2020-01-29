@@ -35,8 +35,6 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 22;
 
-void restoreMessageSpace();
-
 
 void waitTicks(char t)
 {
@@ -140,14 +138,3 @@ void initMachineIO()
 	installChars();
 	srand(TED.t1_lo);
 }
-
-void restoreMessageSpace()
-{
-	char i;
-	for (i = 1; i < 39; i++)
-	{
-		*(screen + i) = 64;
-		*(COLOR_RAM + i) = color_frame;
-	}
-}
-
