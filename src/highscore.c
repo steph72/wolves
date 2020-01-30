@@ -14,6 +14,34 @@ void createDefaultHighscores()
     }
 }
 
+void checkNewHighscore(int aScore)
+{
+    char i, j;
+    char buf[10];
+    for (i = 0; i < 10; ++i)
+    {
+        if (aScore > hEntries[i].score)
+        {
+            clrscr();
+            cputs("***** a new high score! *****\r\n\r\nyour name (max. 8 chars):\r\n");
+            fgets(buf, 10, stdin);
+            buf[strlen(buf)-1]=0;
+
+            if (i != 9)
+            {
+                for (j = 10; j > i; j--)
+                {
+                    hEntries[j].score = hEntries[j - 1].score;
+                    strcpy(hEntries[j].name, hEntries[j - 1].name);
+                }
+            }
+            hEntries[i].score = aScore;
+            strcpy(hEntries[i].name, buf);
+            return;
+        }
+    }
+}
+
 void showHighscores()
 {
     char i, y;
@@ -26,8 +54,8 @@ void showHighscores()
             dx = 20;
             dy = 0;
         }
-        gotoxy(dx,y+dy);
-        cprintf("%2d. %8s %5d",i+1,hEntries[i].name,hEntries[i].score);
+        gotoxy(dx, y + dy);
+        cprintf("%2d. %8s %5d", i + 1, hEntries[i].name, hEntries[i].score);
         dy++;
     }
 }

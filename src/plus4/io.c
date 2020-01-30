@@ -23,12 +23,9 @@ const char color_frame = BCOLOR_BLUE | CATTR_LUMA3;
 const char color_levelTitle = BCOLOR_CYAN | CATTR_LUMA6 | CATTR_BLINK;
 const char color_levelDisplay = BCOLOR_PURPLE | CATTR_LUMA6;
 const char color_levelDescription = BCOLOR_GREEN | CATTR_LUMA5;
-
-const char preyC[] = {0, 0, 2, 65, 253, 63, 30, 54};
-const char wolfC[] = {0, 1, 65, 254, 62, 34, 34, 102};
-const char florC[] = {0, 4, 64, 0, 4, 0, 32, 1};
-const char bushC[] = {0, 4, 64, 0, 84, 170, 84, 40};
-const char treeC[] = {0, 44, 94, 110, 60, 24, 24, 25};
+const char color_help = BCOLOR_CYAN | CATTR_LUMA5;
+const char color_prompt = BCOLOR_WHITE | CATTR_LUMA4;
+const char color_score = BCOLOR_PURPLE | CATTR_LUMA4;
 
 const char colors[] = {PREYCOLOR, WOLFCOLOR, EARTHCOLOR, BUSHCOLOR, TREECOLOR};
 

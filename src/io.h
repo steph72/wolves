@@ -18,3 +18,13 @@ void installCharset();
 
 extern const char minX, minY;
 extern const char maxX, maxY;
+
+extern const char color_score;
+extern const char color_help;
+extern const char color_prompt;
+
+extern const char wolfC[];
+extern const char preyC[];
+extern const char treeC[];
+extern const char bushC[];
+extern const char florC[];

@@ -12,6 +12,12 @@ extern const char color_levelDisplay;
 extern const char color_levelDescription;
 extern const char color_frame;
 
+const char wolfC[] = {0, 1, 65, 254, 62, 34, 34, 102};
+const char preyC[] = {0, 0, 2, 65, 253, 63, 30, 54};
+const char treeC[] = {0, 44, 94, 110, 60, 24, 24, 25};
+const char bushC[] = {0, 4, 64, 0, 84, 170, 84, 40};
+const char florC[] = {0, 4, 64, 0, 4, 0, 32, 1};
+
 void restoreMessageSpace();
 void waitTicks();
 
@@ -143,6 +149,7 @@ void titlePrompt()
 
 void displayHelp()
 {
+    textcolor(color_help);
     clrscr();
     cbm_k_bsout(14);
     cputs(page1);

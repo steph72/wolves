@@ -9,3 +9,4 @@ typedef struct {
 
 void initHighscores();
 void showHighscores();
+void checkNewHighscore(int aScore);

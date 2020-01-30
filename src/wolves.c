@@ -205,7 +205,9 @@ void init()
 	statusLine = "welcome! help the wolves survive";
 	initMachineIO();
 	initHighscores();
+	textcolor(color_prompt);
 	titlePrompt();
+	textcolor(color_score);
 	gotoxy(0, 10);
 	center("B B  high scores  B B");
 	cputs("\r\n");
