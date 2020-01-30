@@ -35,7 +35,6 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 28;
 
-
 void waitTicks(char ticks)
 {
 	int i;
@@ -107,14 +106,14 @@ void title(void)
 	unsigned char currentColor;
 	unsigned char lineCount = 0;
 	unsigned char columnCount = 0;
-	unsigned char colors[] = {COLOR_BLUE,COLOR_BLUE,COLOR_LIGHTBLUE,COLOR_LIGHTBLUE,COLOR_CYAN};
+	unsigned char colors[] = {COLOR_BLUE, COLOR_BLUE, COLOR_LIGHTBLUE, COLOR_LIGHTBLUE, COLOR_CYAN};
 	unsigned char i = 0;
 	unsigned char x = 255;
 
 	textcolor(COLOR_GRAY2);
 	clrscr();
 
-	adr = 0;
+	adr = 0x100;
 	current = wtitle;
 
 	do
@@ -132,7 +131,7 @@ void title(void)
 		currentColor = colors[lineCount];
 		for (columnCount = 0; columnCount < 40; columnCount++)
 		{
-			vpoke(currentColor,1+(columnCount*2)+((5+lineCount)*0x100));
+			vpoke(currentColor, 1 + (columnCount * 2) + ((2 + lineCount) * 0x100));
 		}
 	}
 }
@@ -149,6 +148,4 @@ void initMachineIO()
 	installCharset();
 	srand(VIA1.t1_lo);
 	title();
-	gotoxy(0, 14);
-	titlePrompt();
 }

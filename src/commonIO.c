@@ -136,9 +136,7 @@ void restoreMessageSpace()
 
 void titlePrompt()
 {
-    center("written by stephan kleinert");
-    center("(c) 2020 7turtles software");
-    cputs("\r\n");
+    gotoxy(0,maxY-1);
     center("hit 'i' for instructions or");
     center("any other key to start the game");
 }

@@ -12,6 +12,7 @@ void displayScore(int score);
 void drawFrame();
 void titlePrompt();
 void displayHelp();
+void center(char *aString);
 
 void installCharset();
 

@@ -116,7 +116,7 @@ void title()
 		currentColor = colors[lineCount] + 0x00 + (lineCount * 0x10);
 		for (columnCount = 0; columnCount < 40; columnCount++)
 		{
-			*(COLOR_RAM + ((5 + lineCount) * 40) + columnCount) = currentColor;
+			*(COLOR_RAM + ((1 + lineCount) * 40) + columnCount) = currentColor;
 		}
 	}
 
@@ -148,5 +148,4 @@ void initMachineIO()
 	title();
 	gotoxy(0, 14);
 	textcolor(BCOLOR_CYAN | CATTR_LUMA3);
-	titlePrompt();
 }

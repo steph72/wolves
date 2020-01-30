@@ -11,6 +11,7 @@
 #include "io.h"
 #include "utils.h"
 #include "levels.h"
+#include "highscore.h"
 
 #define PE_PER_LEVEL 100
 #define PE_PER_PREY 25
@@ -203,6 +204,12 @@ void init()
 	}
 	statusLine = "welcome! help the wolves survive";
 	initMachineIO();
+	initHighscores();
+	titlePrompt();
+	gotoxy(0, 10);
+	center("B B  high scores  B B");
+	cputs("\r\n");
+	showHighscores();
 }
 
 char positionIsOffScreen(position *aPos)

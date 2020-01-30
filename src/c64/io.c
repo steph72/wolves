@@ -117,7 +117,7 @@ void title()
 	for (lineCount=0;lineCount<5;++lineCount) {
 		currentColor = colors[lineCount];
 		for (columnCount=0;columnCount<40;columnCount++) {
-			*(COLOR_RAM+((5+lineCount)*40)+columnCount) = currentColor;
+			*(COLOR_RAM+((1+lineCount)*40)+columnCount) = currentColor;
 		}
 	}
 
@@ -144,6 +144,4 @@ void initMachineIO()
 	installCharset();
 	srand(CIA1.ta_lo);
 	title();
-	gotoxy(0,15);
-	titlePrompt();
 }
