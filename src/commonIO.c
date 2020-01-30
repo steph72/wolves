@@ -3,6 +3,7 @@
 #include <string.h>
 #include "wolftypes.h"
 #include "io.h"
+#include "title.h"
 
 extern char buf[]; // from wolves.c
 
@@ -140,4 +141,20 @@ void titlePrompt()
     cputs("\r\n");
     center("hit 'i' for instructions or");
     center("any other key to start the game");
+}
+
+void displayHelp()
+{
+    clrscr();
+    cbm_k_bsout(14);
+    cputs(page1);
+    cgetc();
+    clrscr();
+    cputs(page2);
+    cgetc();
+    cbm_k_bsout(142);
+#ifdef __CX16__        
+    /* take care of the cx16 re-writing the vera charset data upon changing text mode */
+    installCharset();       
+#endif
 }

@@ -1,5 +1,6 @@
 #include "../wolftypes.h"
 #include "../io.h"
+#include "../title.h"
 #include "charset.h"
 #include <conio.h>
 #include <6502.h>
@@ -35,9 +36,6 @@ const char minX = 1;
 const char minY = 1;
 const char maxX = 38;
 const char maxY = 22;
-
-unsigned char wtitle[];
-
 
 void waitTicks(char t)
 {
@@ -106,17 +104,19 @@ void title()
 	unsigned char *cColor;
 	unsigned char currentColor;
 	unsigned char lineCount = 0;
-	unsigned char columnCount=0;
-	unsigned char colors[] = {BCOLOR_PURPLE,BCOLOR_DARKBLUE,BCOLOR_LIGHTBLUE,BCOLOR_LIGHTBLUE,BCOLOR_CYAN};
+	unsigned char columnCount = 0;
+	unsigned char colors[] = {BCOLOR_PURPLE, BCOLOR_DARKBLUE, BCOLOR_LIGHTBLUE, BCOLOR_LIGHTBLUE, BCOLOR_CYAN};
 
 	textcolor(BCOLOR_WHITE | CATTR_LUMA1);
 	clrscr();
 
 	// TED rules!
-	for (lineCount=0;lineCount<5;++lineCount) {
-		currentColor = colors[lineCount]+0x00+(lineCount*0x10);
-		for (columnCount=0;columnCount<40;columnCount++) {
-			*(COLOR_RAM+((5+lineCount)*40)+columnCount) = currentColor;
+	for (lineCount = 0; lineCount < 5; ++lineCount)
+	{
+		currentColor = colors[lineCount] + 0x00 + (lineCount * 0x10);
+		for (columnCount = 0; columnCount < 40; columnCount++)
+		{
+			*(COLOR_RAM + ((5 + lineCount) * 40) + columnCount) = currentColor;
 		}
 	}
 
@@ -130,6 +130,8 @@ void title()
 
 void initMachineIO()
 {
+	char c;
+
 	bordercolor(0);
 	bgcolor(0);
 	textcolor(0x55);
@@ -144,8 +146,7 @@ void initMachineIO()
 	installChars();
 	srand(TED.t1_lo);
 	title();
-	gotoxy(0,14);
-	textcolor(BCOLOR_CYAN|CATTR_LUMA3);
+	gotoxy(0, 14);
+	textcolor(BCOLOR_CYAN | CATTR_LUMA3);
 	titlePrompt();
-	cgetc();
 }

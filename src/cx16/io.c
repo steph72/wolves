@@ -1,5 +1,6 @@
 #include "../wolftypes.h"
 #include "../io.h"
+#include "../title.h"
 #include <conio.h>
 #include <string.h>
 #include <6502.h>
@@ -34,7 +35,6 @@ const char minY = 1;
 const char maxX = 38;
 const char maxY = 28;
 
-unsigned char wtitle[];
 
 void waitTicks(char ticks)
 {
@@ -151,5 +151,4 @@ void initMachineIO()
 	title();
 	gotoxy(0, 14);
 	titlePrompt();
-	cgetc();
 }

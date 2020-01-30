@@ -609,9 +609,16 @@ void runGame(char numTrees, char numBushes, char numWolves, char preyChance, cha
 void main()
 {
 	level aLevel;
+	char c;
 	char level = 0;
 
-	init();
+	init(); // init machine & display title
+
+	c = cgetc();
+	if (c == 'i')
+	{
+		displayHelp();
+	}
 
 	do
 	{
