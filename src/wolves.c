@@ -521,25 +521,31 @@ void gameLoop(char preyChance, char preyNeeded)
 		yd = 0;
 		huntSuccess = 0;
 
-		do
-		{
-			command = cgetc();
-		} while (strchr("ijklnb ", command) == NULL);
+		command = cgetc();
 
 		switch (command)
 		{
+
+		case 145:
 		case 'i':
 			yd--;
 			break;
+
+		case 17:
 		case 'k':
 			yd++;
 			break;
+
+		case 157:
 		case 'j':
 			xd--;
 			break;
+
+		case 29:
 		case 'l':
 			xd++;
 			break;
+
 		case 'n':
 		{
 			shouldUpdateStatus = true;
@@ -552,38 +558,48 @@ void gameLoop(char preyChance, char preyNeeded)
 			nextWolf(true);
 			break;
 		}
-		default:
+		case ' ':
+		{
 			break;
 		}
-		huntSuccess = moveWolf(currentWolfIndex, xd, yd);
-		preyCaught += huntSuccess;
-		updateWolves();
-
-		if (command != 'n' && command != 'b')
-		{
-			if (xd || yd)
-			{
-				packEnergy -= PE_MOVEMENT_COST;
-			}
-			else
-			{
-				packEnergy -= PE_WAIT_COST;
-			}
-
-			servicePrey(preyChance);
+		default:
+			command = 0;
+			break;
 		}
 
-		if (packEnergy < 0 || preyCaught >= preyNeeded)
+		if (command)
 		{
-			quit = true;
-		}
 
-		displayStatusIfNeeded();
+			huntSuccess = moveWolf(currentWolfIndex, xd, yd);
+			preyCaught += huntSuccess;
+			updateWolves();
+
+			if (command != 'n' && command != 'b')
+			{
+				if (xd || yd)
+				{
+					packEnergy -= PE_MOVEMENT_COST;
+				}
+				else
+				{
+					packEnergy -= PE_WAIT_COST;
+				}
+
+				servicePrey(preyChance);
+			}
+
+			if (packEnergy < 0 || preyCaught >= preyNeeded)
+			{
+				quit = true;
+			}
+
+			displayStatusIfNeeded();
+		}
 	}
 
 	if (packEnergy >= 0)
 	{
-		gotoxy(0,(maxY/2)-1);
+		gotoxy(0, (maxY / 2) - 1);
 		center("                          ");
 		center("   ** level complete **   ");
 		center("                          ");
@@ -664,7 +680,7 @@ void main()
 
 		} while (packEnergy >= 0);
 
-		gotoxy(0,(maxY/2)-3);
+		gotoxy(0, (maxY / 2) - 3);
 		revers(1);
 		center("                   ");
 		center(" AAA game over AAA ");
@@ -677,6 +693,6 @@ void main()
 		clrscr();
 		checkNewHighscore(200);
 		title();
-		
+
 	} while (!quit);
 }

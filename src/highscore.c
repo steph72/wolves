@@ -56,7 +56,11 @@ void checkNewHighscore(int aScore)
             strcpy(hEntries[i].name, buf);
             cursor(0);
 #ifndef __CX16__
-            saveHighscores();   // see below
+            // TODO:
+            // for some reason, creating the scorefile fails on the cx16, so
+            // we disable persisting the score until a someone figures out what's
+            // going on there...
+            saveHighscores();
 #endif
             return;
         }
@@ -81,19 +85,6 @@ void showHighscores()
     }
 }
 
-#ifdef __CX16__
-
-// for some reason, creating the scorefile fails on the cx16, so
-// we disable persisting the score until a someone figures out what's
-// going on there...
-
-void initHighscores()
-{
-    createDefaultHighscores();
-}
-
-#else
-
 void initHighscores()
 {
     FILE *hsfile;
@@ -106,5 +97,3 @@ void initHighscores()
     fread(hEntries, sizeof(hEntries), 1, hsfile);
     fclose(hsfile);
 }
-
-#endif
