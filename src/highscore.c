@@ -1,4 +1,5 @@
 #include "highscore.h"
+#include "utils.h"
 
 #define SCOREFILE "wscores"
 
@@ -9,9 +10,25 @@ void createDefaultHighscores()
     char i;
     for (i = 0; i < 10; ++i)
     {
-        hEntries[i].score = (10 - i) * 20;
+        hEntries[i].score = (10 - i) * 50;
         strcpy(hEntries[i].name, "buba");
     }
+}
+
+void saveHighscores()
+{
+    FILE *hsfile;
+    cputs("\r\nplease wait, saving scores...\r\n");
+    hsfile = fopen(SCOREFILE, "w");
+    if (!hsfile)
+    {
+        cputs("\r\ncould not write highscore file!");
+        waitkey();
+        return;
+    }
+    fwrite(hEntries, sizeof(hEntries), 1, hsfile);
+    fclose(hsfile);
+    return;
 }
 
 void checkNewHighscore(int aScore)
@@ -25,7 +42,7 @@ void checkNewHighscore(int aScore)
             clrscr();
             cputs("***** a new high score! *****\r\n\r\nyour name (max. 8 chars):\r\n");
             fgets(buf, 10, stdin);
-            buf[strlen(buf)-1]=0;
+            buf[strlen(buf) - 1] = 0;
 
             if (i != 9)
             {
@@ -37,6 +54,10 @@ void checkNewHighscore(int aScore)
             }
             hEntries[i].score = aScore;
             strcpy(hEntries[i].name, buf);
+            cursor(0);
+#ifndef __CX16__
+            saveHighscores();   // see below
+#endif
             return;
         }
     }
@@ -60,26 +81,23 @@ void showHighscores()
     }
 }
 
-void saveHighscores()
+#ifdef __CX16__
+
+// for some reason, creating the scorefile fails on the cx16, so
+// we disable persisting the score until a someone figures out what's
+// going on there...
+
+void initHighscores()
 {
-    FILE *hsfile;
-    hsfile = fopen(SCOREFILE, "wb");
-    if (!hsfile)
-    {
-        gotoxy(0, 0);
-        cputs("could not write highscore file!");
-        cgetc();
-        return;
-    }
-    fwrite(hEntries, sizeof(hEntries), 1, hsfile);
-    fclose(hsfile);
-    return;
+    createDefaultHighscores();
 }
+
+#else
 
 void initHighscores()
 {
     FILE *hsfile;
-    hsfile = fopen(SCOREFILE, "rb");
+    hsfile = fopen(SCOREFILE, "r");
     if (!hsfile)
     {
         createDefaultHighscores();
@@ -88,3 +106,5 @@ void initHighscores()
     fread(hEntries, sizeof(hEntries), 1, hsfile);
     fclose(hsfile);
 }
+
+#endif

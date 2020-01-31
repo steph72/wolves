@@ -4,6 +4,7 @@
 #include "wolftypes.h"
 #include "io.h"
 #include "title.h"
+#include "utils.h"
 
 extern char buf[]; // from wolves.c
 
@@ -19,7 +20,6 @@ const char bushC[] = {0, 4, 64, 0, 84, 170, 84, 40};
 const char florC[] = {0, 4, 64, 0, 4, 0, 32, 1};
 
 void restoreMessageSpace();
-void waitTicks();
 
 void drawFrame()
 {
@@ -69,8 +69,8 @@ void center(char *aString)
 {
     char y;
     y = wherey();
-    gotoxy(20 - (strlen(aString) / 2), y);
-    puts(aString);
+    cputsxy(20 - (strlen(aString) / 2), y,aString);
+    gotoxy(0,y+1);
 }
 
 void displayLevelTitleCard(char num, level *aLevel)
@@ -94,8 +94,7 @@ void displayLevelTitleCard(char num, level *aLevel)
             aLevel->numBushes, aLevel->numTrees);
     center(buf);
     puts("\n\n");
-    cgetc();
-    clrscr();
+    waitkey();
 }
 
 char updateStatus(char *currentWolfName, char *statusLine)
@@ -153,10 +152,10 @@ void displayHelp()
     clrscr();
     cbm_k_bsout(14);
     cputs(page1);
-    cgetc();
+    waitkey();
     clrscr();
     cputs(page2);
-    cgetc();
+    waitkey();
     cbm_k_bsout(142);
 #ifdef __CX16__        
     /* take care of the cx16 re-writing the vera charset data upon changing text mode */

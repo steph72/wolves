@@ -142,7 +142,4 @@ void initMachineIO()
 	copychars();
 	installChars();
 	srand(TED.t1_lo);
-	title();
-	gotoxy(0, 14);
-	textcolor(BCOLOR_CYAN | CATTR_LUMA3);
 }

@@ -188,8 +188,15 @@ void removePrey(thing *aPrey)
 
 void init()
 {
+	initMachineIO();
+	title();
+	initHighscores();
+}
+
+void startOver()
+{
 	unsigned int i;
-	clrscr();
+
 	score = 0;
 	wolfCount = 0;
 	packEnergy = 0;
@@ -203,8 +210,6 @@ void init()
 		wolves[i].runmode = wRunModeNone;
 	}
 	statusLine = "welcome! help the wolves survive";
-	initMachineIO();
-	initHighscores();
 	textcolor(color_prompt);
 	titlePrompt();
 	textcolor(color_score);
@@ -578,7 +583,11 @@ void gameLoop(char preyChance, char preyNeeded)
 
 	if (packEnergy >= 0)
 	{
-		sprintf(buf, "level complete. bonus: %d points", packEnergy);
+		gotoxy(0,(maxY/2)-1);
+		center("                          ");
+		center("   ** level complete **   ");
+		center("                          ");
+		sprintf(buf, "bonus: %d points", packEnergy);
 		statusLine = buf;
 		score += packEnergy;
 		displayScore(score);
@@ -620,32 +629,54 @@ void main()
 	level aLevel;
 	char c;
 	char level = 0;
+	char quit = false;
 
-	init(); // init machine & display title
-
-	c = cgetc();
-	if (c == 'i')
-	{
-		displayHelp();
-	}
+	init(); // init machine
 
 	do
 	{
+		startOver(); // reset everything for a new game
+		level = 0;
 
-		if (level < 10)
+		c = cgetc();
+		if (c == 'i')
 		{
-			aLevel = wLevels[level];
-
-			displayLevelTitleCard(level + 1, &aLevel);
-
-			runGame(aLevel.numTrees,
-					aLevel.numBushes,
-					aLevel.numWolves,
-					aLevel.preyChance,
-					aLevel.preyNeeded);
+			displayHelp();
 		}
 
-		++level;
+		do
+		{
 
-	} while (packEnergy >= 0);
+			if (level < 10)
+			{
+				aLevel = wLevels[level];
+
+				displayLevelTitleCard(level + 1, &aLevel);
+
+				runGame(aLevel.numTrees,
+						aLevel.numBushes,
+						aLevel.numWolves,
+						aLevel.preyChance,
+						aLevel.preyNeeded);
+			}
+
+			++level;
+
+		} while (packEnergy >= 0);
+
+		gotoxy(0,(maxY/2)-3);
+		revers(1);
+		center("                   ");
+		center(" AAA game over AAA ");
+		center("                   ");
+		center(" E press any key E ");
+		center("                   ");
+		waitTicks(10);
+		waitkey();
+		revers(0);
+		clrscr();
+		checkNewHighscore(200);
+		title();
+		
+	} while (!quit);
 }

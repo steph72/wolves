@@ -89,6 +89,8 @@ void installCharset()
 		*((unsigned char *)(RAMCHARS + (68 * 8) + i)) = bushC[i];				  // 66 = "B"
 		*((unsigned char *)(RAMCHARS + (69 * 8) + i)) = treeC[i];				  // 84 = "T"
 	}
+
+	clrscr();
 }
 
 void setupScreen()
@@ -128,17 +130,10 @@ void title()
 
 void initMachineIO()
 {
+	VIC.ctrl1 &= 0xef; // blank screen
 	bordercolor(0);
 	bgcolor(0);
-	*vicadr = 21; // uppercase
-	textcolor(5);
-	gotoxy(0, 0);
-	cprintf("stephan   katja");
-	textcolor(2);
-	gotoxy(8, 0);
-	cprintf("%c", 211);
-	waitTicks(10);
 	installCharset();
 	srand(CIA1.ta_lo);
-	title();
+	VIC.ctrl1 |= 0x10;
 }

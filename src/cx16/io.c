@@ -141,8 +141,6 @@ void initMachineIO()
 	bgcolor(0);
 	bordercolor(0);
 	textcolor(5);
-	clrscr();
 	installCharset();
 	srand(VIA1.t1_lo);
-	title();
 }

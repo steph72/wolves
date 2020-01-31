@@ -10,9 +10,11 @@ void displayPackEnergy(int packEnergy);
 void displayLevelTitleCard(char num, level *aLevel);
 void displayScore(int score);
 void drawFrame();
+void title();
 void titlePrompt();
 void displayHelp();
 void center(char *aString);
+void waitTicks(char ticks);
 
 void installCharset();
 
