@@ -15,7 +15,7 @@
 
 #define PE_PER_LEVEL 100
 #define PE_PER_PREY 25
-#define PE_MOVEMENT_COST 2
+#define PE_MOVEMENT_COST 3
 #define PE_WAIT_COST 1
 #define SCORE_PER_PREY 10
 
@@ -240,7 +240,8 @@ void movePrey(thing *aPrey)
 	newPos.y = oldPos.y + aPrey->movY;
 
 	putItemAtPos(oldPos.x, oldPos.y, it_earth);
-	if (positionIsOffScreen(&newPos))
+	if (positionIsOffScreen(&newPos) ||
+		(itemAtPos(newPos.x, newPos.y)) == it_bush)
 	{
 		removePrey(aPrey);
 		return;
@@ -304,7 +305,10 @@ void fleePrey(thing *aPrey)
 			(itemAtPos(newPos.x, newPos.y)) == it_bush)
 		{
 			removePrey(aPrey);
-			statusLine = "prey got away!";
+			if (!statusLine)
+			{
+				statusLine = "prey got away!";
+			}
 		}
 		else
 		{
@@ -323,6 +327,7 @@ void lookoutPrey(thing *aPrey)
 	thing *testWolf;
 	signed char xdiff, ydiff;
 	char i;
+
 	for (i = 0; i < wolfCount; i++)
 	{
 		testWolf = &(wolves[i]);
@@ -361,11 +366,12 @@ void servicePrey(char preyChance)
 	{
 		if (currentPrey->runmode == wRunModeNormal)
 		{
-			if (drand(100) > 25) // let prey eat once in a while
+			lookoutPrey(currentPrey);
+			if (drand(100) > 25 &&
+				currentPrey->runmode != wRunModeFlee) // let prey eat once in a while
 			{
 				wanderPrey(currentPrey);
 			}
-			lookoutPrey(currentPrey);
 		}
 		else if (currentPrey->runmode == wRunModeFlee)
 		{
@@ -651,6 +657,7 @@ void main()
 
 	do
 	{
+		title();
 		startOver(); // reset everything for a new game
 		level = 0;
 
@@ -691,8 +698,7 @@ void main()
 		waitkey();
 		revers(0);
 		clrscr();
-		checkNewHighscore(200);
-		title();
+		checkNewHighscore(score);
 
 	} while (!quit);
 }
