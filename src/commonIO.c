@@ -36,20 +36,26 @@ void drawFrame()
 void displayPackEnergy(int packEnergy)
 {
     revers(1);
-    gotoxy(30, maxY + 1);
-    cputs("        ");
-    gotoxy(30, maxY + 1);
-    textcolor(color_frame);
-    printf("pe: %d", packEnergy);
+    gotoxy(maxX - 13, maxY + 1);
+    if (packEnergy <= 40)
+    {
+        textcolor(color_warn);
+    }
+    else
+    {
+        textcolor(color_frame);
+    }
+    printf("pe%4d", packEnergy);
     revers(0);
+    textcolor(color_frame);
 }
 
 void displayScore(int score)
 {
-    gotoxy(20, maxY + 1);
+    gotoxy(maxX - 5, maxY + 1);
     textcolor(color_frame);
     revers(1);
-    printf("s: %d", score);
+    printf("s%4d", score);
     revers(0);
 }
 
@@ -69,8 +75,32 @@ void center(char *aString)
 {
     char y;
     y = wherey();
-    cputsxy(20 - (strlen(aString) / 2), y,aString);
-    gotoxy(0,y+1);
+    cputsxy(20 - (strlen(aString) / 2), y, aString);
+    gotoxy(0, y + 1);
+}
+
+void displayWinCard(int endScore) {
+    clrscr();
+    textcolor(color_frame);
+    chlinexy(0, 0, 40);
+    chlinexy(0, maxY + 1, 40);
+    gotoxy(0, 3);
+    textcolor(color_levelDisplay);
+    center("** congratulations **");
+    puts("\n");
+    textcolor(color_levelTitle);
+    center("the pack survived!");
+    puts("\n");
+    textcolor(color_levelDescription);
+    center("bonus for winning the game:");
+    center(" ** 2000 points **");
+    puts("\n\n");
+    textcolor(color_levelTitle);
+    center ("your end score:");
+    sprintf(buf,"** %d points **",endScore+2000);
+    center(buf);
+    textcolor(color_frame);
+    waitkey();
 }
 
 void displayLevelTitleCard(char num, level *aLevel)
@@ -97,7 +127,7 @@ void displayLevelTitleCard(char num, level *aLevel)
     waitkey();
 }
 
-char updateStatus(char *currentWolfName, char *statusLine)
+char updateStatus(char *currentWolfName, char *statusLine, char level, char preyToCatch)
 {
     unsigned char i;
     char rvs;
@@ -108,8 +138,10 @@ char updateStatus(char *currentWolfName, char *statusLine)
     revers(1);
     textcolor(color_frame);
     cprintf("%s", currentWolfName);
+    gotoxy(maxX - 19, maxY + 1);
+    cprintf("Z%2d", preyToCatch);
     revers(0);
-    chlinexy(minX + strlen(currentWolfName) + 1, maxY + 1, 18 - strlen(currentWolfName) - 2);
+    chlinexy(minX + strlen(currentWolfName) + 1, maxY + 1, 15 - strlen(currentWolfName) - 2);
     if (statusLine != NULL)
     {
         restoreMessageSpace();
@@ -119,7 +151,7 @@ char updateStatus(char *currentWolfName, char *statusLine)
             rvs = !rvs;
             gotoxy(2, 0);
             revers(rvs);
-            cprintf(statusLine);
+            cputs(statusLine);
             waitTicks(10);
         }
         statusLine = NULL;
@@ -129,6 +161,10 @@ char updateStatus(char *currentWolfName, char *statusLine)
     else
     {
         restoreMessageSpace();
+        revers(1);
+        gotoxy(minX + 1, minY - 1);
+        cprintf("level %d", level);
+        revers(0);
     }
     return shouldUpdateAgain;
 }
@@ -141,24 +177,32 @@ void restoreMessageSpace()
 
 void titlePrompt()
 {
-    gotoxy(0,maxY-1);
+    gotoxy(0, maxY - 1);
     center("hit 'i' for instructions or");
     center("any other key to start the game");
 }
 
 void displayHelp()
 {
-    textcolor(color_help);
-    clrscr();
+    char currentPage=0;
+    char cmd;
     cbm_k_bsout(14);
-    cputs(page1);
-    waitkey();
-    clrscr();
-    cputs(page2);
-    waitkey();
+    do {
+        clrscr();
+        textcolor(color_help);
+        cputs(helpPages[currentPage]);
+        textcolor(color_frame);
+        chlinexy(0,1,40);
+        chlinexy(0,maxY,40);
+        textcolor(color_prompt);
+        cputsxy(0,maxY+1,"B)ack N)ext eX)it");
+        cmd = cgetc();
+        if ((cmd=='n') && currentPage<2) ++currentPage;
+        if ((cmd=='b') && currentPage>0) --currentPage;
+    } while (cmd!='x');
     cbm_k_bsout(142);
-#ifdef __CX16__        
+#ifdef __CX16__
     /* take care of the cx16 re-writing the vera charset data upon changing text mode */
-    installCharset();       
+    installCharset();
 #endif
 }

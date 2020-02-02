@@ -24,6 +24,7 @@
 #define RAMCHARS 0xa000
 
 const char color_frame = COLOR_BLUE;
+const char color_warn = COLOR_LIGHTRED;
 const char color_levelTitle = COLOR_CYAN;
 const char color_levelDisplay = COLOR_PURPLE;
 const char color_levelDescription = COLOR_GREEN;

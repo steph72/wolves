@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <conio.h>
 
-void waitkey(void) {
+char waitkey(void) {
     while(kbhit()) {
         cgetc();
     }
-    cgetc();
+    return cgetc();
 }
 
 unsigned int drand(unsigned int max) {

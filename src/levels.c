@@ -12,5 +12,5 @@ level wLevels[] = {
     {0, 5, 30, 30, 15, 10, "...and back to spring"},
     {0, 8, 30, 30, 72, 10, "a summer feast"},
     {0, 2, 80, 125, 10, 2, "duet"},
-    {10, 5, 60, 150, 10, 5, "hard times"}
+    {10, 5, 60, 150, 20, 5, "hard times"}
 };

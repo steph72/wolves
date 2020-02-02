@@ -20,6 +20,7 @@
 #define PREYCOLOR BCOLOR_RED | CATTR_LUMA5
 
 const char color_frame = BCOLOR_BLUE | CATTR_LUMA3;
+const char color_warn = BCOLOR_RED | CATTR_LUMA4 | CATTR_BLINK;
 const char color_levelTitle = BCOLOR_CYAN | CATTR_LUMA6 | CATTR_BLINK;
 const char color_levelDisplay = BCOLOR_PURPLE | CATTR_LUMA6;
 const char color_levelDescription = BCOLOR_GREEN | CATTR_LUMA5;

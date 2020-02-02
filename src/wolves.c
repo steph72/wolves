@@ -14,7 +14,7 @@
 #include "highscore.h"
 
 #define PE_PER_LEVEL 100
-#define PE_PER_PREY 25
+#define PE_PER_PREY 33
 #define PE_MOVEMENT_COST 3
 #define PE_WAIT_COST 1
 #define SCORE_PER_PREY 10
@@ -27,6 +27,10 @@ thing wolves[MAXWOLVES];
 
 int packEnergy;
 int score;
+
+char gCurrentLevelNo;
+char gPreyCaught;
+char gPreyNeeded;
 
 char wolfCount;
 char numPrey;
@@ -224,11 +228,11 @@ char positionIsOffScreen(position *aPos)
 	return (aPos->x > maxX || aPos->y > maxY || aPos->x < minX || aPos->y < minY);
 }
 
-char isValidDestination(position *aPos)
+char isValidDestination(thing *aThing, position *aPos)
 {
 	return (positionIsOffScreen(aPos) ||
 			(itemAtPos(aPos->x, aPos->y)) == it_earth ||
-			(itemAtPos(aPos->x, aPos->y)) == it_bush);
+			(((itemAtPos(aPos->x, aPos->y)) == it_bush) && aThing->runmode == wRunModeFlee));
 }
 
 void movePrey(thing *aPrey)
@@ -264,7 +268,7 @@ void chooseRandomDest(thing *aPrey)
 		ydiff = -1 + drand(3);
 		newPos.x = oldPos.x + xdiff;
 		newPos.y = oldPos.y + ydiff;
-	} while (!isValidDestination(&newPos));
+	} while (!isValidDestination(aPrey, &newPos));
 
 	aPrey->movX = xdiff;
 	aPrey->movY = ydiff;
@@ -278,7 +282,7 @@ void wanderPrey(thing *aPrey)
 	newPos.x = aPrey->pos.x + aPrey->movX;
 	newPos.y = aPrey->pos.y + aPrey->movY;
 
-	if (!isValidDestination(&newPos))
+	if (!isValidDestination(aPrey, &newPos))
 	{
 		chooseRandomDest(aPrey);
 	}
@@ -297,7 +301,7 @@ void fleePrey(thing *aPrey)
 	ydiff = (ydiff > 0) - (ydiff < 0);
 	newPos.x = oldPos.x - xdiff;
 	newPos.y = oldPos.y - ydiff;
-	if (isValidDestination(&newPos))
+	if (isValidDestination(aPrey, &newPos))
 	{
 		aPrey->pos = newPos;
 		putItemAtPos(oldPos.x, oldPos.y, it_earth);
@@ -450,7 +454,9 @@ void displayStatusIfNeeded()
 	{
 		return;
 	}
-	shouldUpdateStatus = updateStatus((char *)names[currentWolfIndex], statusLine);
+	shouldUpdateStatus = updateStatus((char *)names[currentWolfIndex],
+									  statusLine, gCurrentLevelNo + 1,
+									  gPreyNeeded - gPreyCaught);
 	statusLine = NULL;
 }
 
@@ -513,9 +519,11 @@ void gameLoop(char preyChance, char preyNeeded)
 	char xd, yd;
 
 	char huntSuccess;
-	char preyCaught = 0;
 
 	quit = false;
+	gPreyCaught = 0;
+	gPreyNeeded = preyNeeded;
+
 	currentWolfIndex = 0;
 	updateWolves();
 	displayScore(score);
@@ -577,7 +585,7 @@ void gameLoop(char preyChance, char preyNeeded)
 		{
 
 			huntSuccess = moveWolf(currentWolfIndex, xd, yd);
-			preyCaught += huntSuccess;
+			gPreyCaught += huntSuccess;
 			updateWolves();
 
 			if (command != 'n' && command != 'b')
@@ -594,7 +602,7 @@ void gameLoop(char preyChance, char preyNeeded)
 				servicePrey(preyChance);
 			}
 
-			if (packEnergy < 0 || preyCaught >= preyNeeded)
+			if (packEnergy < 0 || gPreyCaught >= preyNeeded)
 			{
 				quit = true;
 			}
@@ -650,16 +658,14 @@ void main()
 {
 	level aLevel;
 	char c;
-	char level = 0;
 	char quit = false;
 
 	init(); // init machine
 
 	do
 	{
-		title();
 		startOver(); // reset everything for a new game
-		level = 0;
+		gCurrentLevelNo = 0;
 
 		c = cgetc();
 		if (c == 'i')
@@ -670,11 +676,11 @@ void main()
 		do
 		{
 
-			if (level < 10)
+			if (gCurrentLevelNo < 10)
 			{
-				aLevel = wLevels[level];
+				aLevel = wLevels[gCurrentLevelNo];
 
-				displayLevelTitleCard(level + 1, &aLevel);
+				displayLevelTitleCard(gCurrentLevelNo + 1, &aLevel);
 
 				runGame(aLevel.numTrees,
 						aLevel.numBushes,
@@ -683,22 +689,34 @@ void main()
 						aLevel.preyNeeded);
 			}
 
-			++level;
+			++gCurrentLevelNo;
 
-		} while (packEnergy >= 0);
+		} while (packEnergy >= 0 && gCurrentLevelNo < 10);
 
-		gotoxy(0, (maxY / 2) - 3);
-		revers(1);
-		center("                   ");
-		center(" AAA game over AAA ");
-		center("                   ");
-		center(" E press any key E ");
-		center("                   ");
-		waitTicks(10);
-		waitkey();
-		revers(0);
-		clrscr();
-		checkNewHighscore(score);
+		if (packEnergy <= 0)
+		{
+
+			gotoxy(0, (maxY / 2) - 3);
+			revers(1);
+			center("                   ");
+			center(" AAA game over AAA ");
+			center("                   ");
+			center(" C press any key C ");
+			center("                   ");
+			waitTicks(10);
+			waitkey();
+			revers(0);
+			clrscr();
+			checkNewHighscore(score);
+		}
+		else
+		{
+			displayWinCard(score);
+			score += 2000;
+			checkNewHighscore(score);
+		}
+
+		title();
 
 	} while (!quit);
 }
